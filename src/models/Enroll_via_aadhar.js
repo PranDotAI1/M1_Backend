@@ -111,10 +111,38 @@ const getProfileInfo = async (accessToken, xToken) => {
   }
 };
 
+const getQrCode = async (accessToken, xToken) => {
+  try {
+    const response = await axios.get(
+      `${config.abdm.abhaBaseUrl}/api/v3/profile/account/qrCode`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-token': `Bearer ${xToken}`,
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString(),
+          'User-Agent': 'ABHA-Integration/1.0'
+        }
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching QRcode info:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to fetch QRcode information',
+      response: error.response?.data
+    };
+  }
+};
+
+
 
 
 export default {
   sendAadhaarOtp,
   verifyAadhaarOtp,
-  getProfileInfo
+  getProfileInfo,
+  getQrCode
 };

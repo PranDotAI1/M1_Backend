@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
-import abhaRoutes from './routes/Enroll_via_aadhar.js';
+import abhaRoutes from './routes/routers.js';
 
 // Load environment variables
 dotenv.config();
