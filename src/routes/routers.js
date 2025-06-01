@@ -4,6 +4,9 @@ import * as loginmobileController from '../controllers/login_via_mobile.js';
 import * as loginaadharController from '../controllers/login_via_aadhar.js';
 import * as loginabhaController from '../controllers/login_via_abha.js';
 import * as loginabhanumberController from '../controllers/login_via_abha_number.js';
+import * as re_kycController from '../controllers/re_kyc.js';
+import * as deactivateController from '../controllers/deactivate.js';
+import * as deleteController from '../controllers/delete.js';
 
 const router = express.Router();
 
@@ -22,4 +25,10 @@ router.post('/login/abha/verify-otp', loginabhaController.verifyLoginOtp);
 router.get('/profile/qrcode', abhaenrollController.getQrCode);
 router.post('/login/abha/number/send-otp', loginabhanumberController.requestLoginOtp);
 router.post('/login/abha/number/verify-otp', loginabhanumberController.verifyLoginOtp);
+router.post('/account/re-kyc/send-otp', re_kycController.requestLoginOtp);
+router.post('/account/re-kyc/verify-otp', re_kycController.verifyLoginOtp);
+router.post('/account/de-activate/send-otp', deactivateController.requestLoginOtp);
+router.post('/account/de-activate/verify-otp', deactivateController.verifyLoginOtp);
+router.post('/account/delete/send-otp', deleteController.requestLoginOtp);
+router.post('/account/delete/verify-otp', deleteController.verifyLoginOtp);
 export default router;
