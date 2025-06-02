@@ -7,7 +7,11 @@ import * as loginabhanumberController from '../controllers/login_via_abha_number
 import * as re_kycController from '../controllers/re_kyc.js';
 import * as deactivateController from '../controllers/deactivate.js';
 import * as deleteController from '../controllers/delete.js';
-
+import * as reactivateController from '../controllers/reactivate.js';
+import * as changePasswordController from '../controllers/change_password.js';
+import * as forgotController from '../controllers/forgot.js';
+import * as dlController from '../controllers/Dl_enroll.js';
+import * as retrievalController from '../controllers/retrieval.js';
 const router = express.Router();
 
 router.post('/token', abhaenrollController.getAccessToken);
@@ -22,6 +26,8 @@ router.post('/login/aadhar/send-otp', loginaadharController.requestLoginOtp);
 router.post('/login/aadhar/verify-otp', loginaadharController.verifyLoginOtp);
 router.post('/login/abha/send-otp', loginabhaController.requestLoginOtp);
 router.post('/login/abha/verify-otp', loginabhaController.verifyLoginOtp);
+router.post('/retrieval/send-otp', retrievalController.requestLoginOtp);
+router.post('/retrieval/verify-otp', retrievalController.verifyLoginOtp);
 router.get('/profile/qrcode', abhaenrollController.getQrCode);
 router.post('/login/abha/number/send-otp', loginabhanumberController.requestLoginOtp);
 router.post('/login/abha/number/verify-otp', loginabhanumberController.verifyLoginOtp);
@@ -31,4 +37,18 @@ router.post('/account/de-activate/send-otp', deactivateController.requestLoginOt
 router.post('/account/de-activate/verify-otp', deactivateController.verifyLoginOtp);
 router.post('/account/delete/send-otp', deleteController.requestLoginOtp);
 router.post('/account/delete/verify-otp', deleteController.verifyLoginOtp);
+router.post('/account/re-activate/send-otp', reactivateController.requestLoginOtp);
+router.post('/account/re-activate/verify-otp', reactivateController.verifyLoginOtp);
+router.post('/account/change-password/send-otp', changePasswordController.requestLoginOtp);
+router.post('/account/change-password/verify-otp', changePasswordController.verifyLoginOtp);
+router.get('/profile/logout', abhaenrollController.logout);
+router.post('/forgot/mobile/send-otp', forgotController.requestMobileOtp);
+router.post('/forgot/mobile/verify-otp', forgotController.verifyMobileOtp);
+router.post('/forgot/aadhar/send-otp', forgotController.requestAadharOtp);
+router.post('/forgot/aadhar/verify-otp', forgotController.verifyAadharOtp);
+router.post('/dl/enroll/send-otp', dlController.sendDlOtp);
+router.post('/dl/enroll/verify-otp', dlController.verifyDlOtp);
+router.post('/dl/enroll/create-enroll-number', dlController.createENumber);
+router.get('/profile/abha-card', abhaenrollController.getAbhaCard);
+
 export default router;
