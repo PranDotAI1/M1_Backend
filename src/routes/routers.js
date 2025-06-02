@@ -12,6 +12,8 @@ import * as changePasswordController from '../controllers/change_password.js';
 import * as forgotController from '../controllers/forgot.js';
 import * as dlController from '../controllers/Dl_enroll.js';
 import * as retrievalController from '../controllers/retrieval.js';
+import * as emailController from '../controllers/email_verify.js';
+
 const router = express.Router();
 
 router.post('/token', abhaenrollController.getAccessToken);
@@ -50,5 +52,9 @@ router.post('/dl/enroll/send-otp', dlController.sendDlOtp);
 router.post('/dl/enroll/verify-otp', dlController.verifyDlOtp);
 router.post('/dl/enroll/create-enroll-number', dlController.createENumber);
 router.get('/profile/abha-card', abhaenrollController.getAbhaCard);
+router.patch('/profile/photo', abhaenrollController.getphoto);
+router.post('/account/verify', loginmobileController.verifyuser);
+router.post('/update/email/send-otp', emailController.requestOtp);
+router.post('/update/email/verify-otp', emailController.verifyOtp);
 
 export default router;

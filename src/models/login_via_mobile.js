@@ -91,8 +91,47 @@ const verifyLoginOtp = async ({ accessToken, txnId, otp }) => {
   }
 };
 
+const verifyuser = async ({ accessToken,  Ttoken, txnId, abhanumber }) => {
+  try {
+    
+    if (!accessToken || !txnId || !abhanumber || !Ttoken) {
+      throw new Error('Missing required parameters: accessToken, txnId, abhanumber, Ttoken');
+    }
+    
+    const response = await axios.post(
+      `${config.abdm.abhaBaseUrl}/api/v3/profile/login/verify/user`,
+     {
+    ABHANumber : abhanumber,
+    txnId : txnId,
+},
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'T-token': `Bearer ${Ttoken}`,
+          'Content-Type': 'application/json',
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString()
+        }
+      }
+    );
+    
+    // Return the response data along with the X-token from headers
+    return {
+      data: response.data,
+    };
+  } catch (error) {
+    console.error('Error verifying user:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to verify user',
+      response: error.response?.data
+    };
+  }
+};
+
 // Export all functions
 export default {
   requestLoginOtp,
-  verifyLoginOtp
+  verifyLoginOtp,
+  verifyuser
 };

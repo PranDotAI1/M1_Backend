@@ -59,3 +59,34 @@ export const verifyLoginOtp = async (req, res) => {
     });
   }
 };
+
+export const verifyuser = async (req, res) => {
+  try {
+    const { txnId, abhanumber } = req.body;
+    const accessToken = req.headers['accesstoken'];
+    const Ttoken = req.headers['t-token'];
+    if (!accessToken || !txnId || !abhanumber || !Ttoken) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'accesstoken, txnId, abhanumber and Ttoken are required' 
+      });
+    }
+    
+    const response = await mobilelogin.verifyuser({accessToken, Ttoken, txnId, abhanumber });
+    
+    // Return both the data and the X-token to the frontend
+    res.status(200).json({ 
+      success: true, 
+      data: response.data,
+      xToken: response.xToken // Frontend will store this
+    });
+  } catch (error) {
+    console.error('Error in verifyuser controller:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while verifying user',
+      error: error.response || null
+    });
+  }
+};

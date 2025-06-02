@@ -8,7 +8,7 @@ dotenv.config();
 
 const sendAadhaarOtp = async (accessToken, loginId) => {
   try {
-    
+
     const response = await axios.post(
       `${config.abdm.abhaBaseUrl}/api/v3/enrollment/request/otp`,
       {
@@ -27,7 +27,7 @@ const sendAadhaarOtp = async (accessToken, loginId) => {
         }
       }
     );
-    
+
     return response.data;
   } catch (error) {
     console.error('Error sending OTP:', error.response?.data || error.message);
@@ -38,13 +38,13 @@ const sendAadhaarOtp = async (accessToken, loginId) => {
 
 const verifyAadhaarOtp = async ({ accessToken, txnId, otpValue, mobile }) => {
   try {
-    
-    
+
+
     if (!accessToken || !txnId || !otpValue || !mobile) {
       throw new Error('Missing required parameters: accesstoken, txnId, otpValue, or mobile');
     }
-  
-    
+
+
     const response = await axios.post(
       `${config.abdm.abhaBaseUrl}/api/v3/enrollment/enrol/byAadhaar`,
       {
@@ -70,7 +70,7 @@ const verifyAadhaarOtp = async ({ accessToken, txnId, otpValue, mobile }) => {
         }
       }
     );
-    
+
     return response.data;
   } catch (error) {
     console.error('Error verifying OTP:', error.response?.data || error.message);
@@ -98,7 +98,7 @@ const getProfileInfo = async (accessToken, xToken) => {
         }
       }
     );
-    
+
     return response.data;
   } catch (error) {
     console.error('Error fetching profile info:', error.response?.data || error.message);
@@ -124,7 +124,7 @@ const getAbhaCard = async (accessToken, xToken) => {
         }
       }
     );
-    
+
     return response.data;
   } catch (error) {
     console.error('Error fetching Abha card info:', error.response?.data || error.message);
@@ -151,13 +151,49 @@ const getQrCode = async (accessToken, xToken) => {
         }
       }
     );
-    
+
     return response.data;
   } catch (error) {
     console.error('Error fetching QRcode info:', error.response?.data || error.message);
     throw {
       status: error.response?.status || 500,
       message: error.response?.data?.message || 'Failed to fetch QRcode information',
+      response: error.response?.data
+    };
+  }
+};
+
+const getphoto = async ({ accessToken, xToken, photo }) => {
+  try {
+
+
+    if (!accessToken || !xToken || !photo) {
+      throw new Error('Missing required parameters: accesstoken, xtoken or photo');
+    }
+
+    const response = await axios.patch(
+      `${config.abdm.abhaBaseUrl}/api/v3/profile/account`,
+
+      {
+        profilePhoto: photo
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-token': `Bearer ${xToken}`,
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString(),
+          'User-Agent': 'ABHA-Integration/1.0'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error in changing the Photo :', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to update photo',
       response: error.response?.data
     };
   }
@@ -178,7 +214,7 @@ const logout = async (accessToken, xToken) => {
         }
       }
     );
-    
+
     return response.data;
   } catch (error) {
     console.error('Error in logout:', error.response?.data || error.message);
@@ -199,5 +235,6 @@ export default {
   getProfileInfo,
   getQrCode,
   getAbhaCard,
+  getphoto,
   logout
 };

@@ -66,6 +66,36 @@ export const verifyAadhaarOtp = async (req, res) => {
   }
 };
 
+export const getphoto = async (req, res) => {
+  try {
+    const { photo} = req.body;
+    // 
+    const accessToken = req.headers['accesstoken'];
+    const xToken = req.headers['x-token'];
+    if (!accessToken || !xToken || !photo){
+      return res.status(400).json({ 
+        success: false, 
+        message: 'accesstoken, xToken and photo are required' 
+      });
+    }
+    
+    const response = await Aadhaarenroll.getphoto({accessToken, xToken , photo });
+    
+    res.status(200).json({ 
+      success: true, 
+      data: response 
+    });
+  } catch (error) {
+    console.error('Error in fetching photo:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while fetching photo',
+      error: error.response || null
+    });
+  }
+};
+
 
 export const getProfileInfo = async (req, res) => {
 
