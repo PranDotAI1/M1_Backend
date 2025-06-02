@@ -129,3 +129,66 @@ export const getQrCode = async (req, res) => {
     });
   }
 };
+
+
+export const getAbhaCard = async (req, res) => {
+
+  try {
+    // Get X-token from request headers
+    const xToken = req.headers['x-token'];
+    const accessToken = req.headers['accesstoken'];
+    
+    if (!accessToken || !xToken) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'X-token and accessToken is required in request headers' 
+      });
+    }
+    const response = await Aadhaarenroll.getAbhaCard(accessToken, xToken);
+    
+    
+    res.status(200).json({ 
+      success: true, 
+      data: response 
+    });
+  } catch (error) {
+    console.error('Error in Abha card info controller:', error);
+    
+    res.status(error.response?.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while fetching abha card information',
+      error: error.response?.data || null
+    });
+  }
+};
+
+export const logout = async (req, res) => {
+
+  try {
+    // Get X-token from request headers
+    const xToken = req.headers['x-token'];
+    const accessToken = req.headers['accesstoken'];
+    
+    if (!accessToken || !xToken) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'X-token and accessToken is required in request headers' 
+      });
+    }
+    const response = await Aadhaarenroll.logout(accessToken, xToken);
+    
+    
+    res.status(200).json({ 
+      success: true, 
+      data: response 
+    });
+  } catch (error) {
+    console.error('Error in logout:', error);
+    
+    res.status(error.response?.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while logout',
+      error: error.response?.data || null
+    });
+  }
+};

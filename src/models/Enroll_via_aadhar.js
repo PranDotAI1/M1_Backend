@@ -2,8 +2,7 @@ import axios from 'axios';
 import config from '../config/index.js';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import abhaService from '../services/abhaService.js';
-import { get } from 'http';
+
 
 dotenv.config();
 
@@ -111,6 +110,33 @@ const getProfileInfo = async (accessToken, xToken) => {
   }
 };
 
+const getAbhaCard = async (accessToken, xToken) => {
+  try {
+    const response = await axios.get(
+      `${config.abdm.abhaBaseUrl}/api/v3/profile/account/abha-card`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-token': `Bearer ${xToken}`,
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString(),
+          'User-Agent': 'ABHA-Integration/1.0'
+        }
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Abha card info:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to fetch Abha card information',
+      response: error.response?.data
+    };
+  }
+};
+
+
 const getQrCode = async (accessToken, xToken) => {
   try {
     const response = await axios.get(
@@ -138,11 +164,40 @@ const getQrCode = async (accessToken, xToken) => {
 };
 
 
+const logout = async (accessToken, xToken) => {
+  try {
+    const response = await axios.get(
+      `${config.abdm.abhaBaseUrl}/api/v3/profile/account/request/logout`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-token': `Bearer ${xToken}`,
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString(),
+          'User-Agent': 'ABHA-Integration/1.0'
+        }
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error in logout:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to logout',
+      response: error.response?.data
+    };
+  }
+};
+
+
 
 
 export default {
   sendAadhaarOtp,
   verifyAadhaarOtp,
   getProfileInfo,
-  getQrCode
+  getQrCode,
+  getAbhaCard,
+  logout
 };
