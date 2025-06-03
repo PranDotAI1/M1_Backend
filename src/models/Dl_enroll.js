@@ -39,11 +39,17 @@ const sendDlOtp = async (accessToken, loginId) => {
 };
 
 
-const verifyDlOtp = async ({ accessToken, txnId, otp }) => {
+const verifyDlOtp = async ({ accessToken, txnId, otpValue }) => {
     try {
 
-        if (!accessToken || !txnId || !otp) {
-            throw new Error('Missing required parameters: accessToken, txnId, otp');
+        if (!accessToken) {
+            throw new Error('Missing required parameters: accessToken');
+        }
+        if (!txnId){
+            throw new Error('Transaction ID (txnId) is required');
+        }
+        if (!otpValue){
+            throw new Error('OTP is required');
         }
 
         const response = await axios.post(
@@ -61,7 +67,7 @@ const verifyDlOtp = async ({ accessToken, txnId, otp }) => {
                     otp: {
                         timeStamp: new Date().toISOString(),
                         txnId: txnId,
-                        otpValue: otp
+                        otpValue: otpValue
                     }
                 }
             },
@@ -94,9 +100,7 @@ const verifyDlOtp = async ({ accessToken, txnId, otp }) => {
 const createENumber = async ({ accessToken, txnId,  DL_number, First_Name, Middle_Name, Last_Name, d_o_b, gender, base_front_photo, base_back_photo, Address, state, District, Pincode }) => {
     try {
 
-        if (!accessToken || !txnId || !otp) {
-            throw new Error('Missing required parameters: accessToken, txnId, otp');
-        }
+    
 
         const response = await axios.post(
             `${config.abdm.abhaBaseUrl}/api/v3/enrollment/auth/byAbdm`,

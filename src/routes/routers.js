@@ -13,6 +13,7 @@ import * as forgotController from '../controllers/forgot.js';
 import * as dlController from '../controllers/Dl_enroll.js';
 import * as retrievalController from '../controllers/retrieval.js';
 import * as emailController from '../controllers/email_verify.js';
+import * as singleapiController from '../controllers/singleapi.js';
 
 const router = express.Router();
 
@@ -56,5 +57,7 @@ router.patch('/profile/photo', abhaenrollController.getphoto);
 router.post('/account/verify', loginmobileController.verifyuser);
 router.post('/update/email/send-otp', emailController.requestOtp);
 router.post('/update/email/verify-otp', emailController.verifyOtp);
+router.post('/profile/singlelogin/api', singleapiController.requestLoginOtp);
+router.post('/profile/singlelogin/api/verify-otp', singleapiController.verifyLoginOtp);
 
 export default router;

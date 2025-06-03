@@ -1,17 +1,17 @@
 import delete_abha from '../models/delete.js';
 export const requestLoginOtp = async (req, res) => {
   try {
-    const { abhaNumber } = req.body;
+    const { loginId } = req.body;
     const access_token = req.headers['accesstoken'];
-    const X_token = req.headers['X_token'];
-    if (!abhaNumber || !X_token || !access_token) {
+    const X_token = req.headers['xtoken'];
+    if (!loginId || !X_token || !access_token) {
       return res.status(400).json({ 
         success: false, 
         message: 'Abha number, X_token and accesstoken is required' 
       });
     }
     
-    const response = await delete_abha.requestLoginOtp(access_token, X_token, abhaNumber);
+    const response = await delete_abha.requestLoginOtp(access_token, X_token, loginId);
     
     res.status(200).json({ 
       success: true, 
@@ -35,7 +35,7 @@ export const verifyLoginOtp = async (req, res) => {
   try {
     const { txnId, otp } = req.body;
     const accessToken = req.headers['accesstoken'];
-    const X_token = req.headers['X_token'];
+    const X_token = req.headers['xtoken'];
     if (!accessToken || !X_token || !txnId || !otp) {
       return res.status(400).json({ 
         success: false, 

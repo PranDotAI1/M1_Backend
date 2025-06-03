@@ -71,7 +71,7 @@ export const getphoto = async (req, res) => {
     const { photo} = req.body;
     // 
     const accessToken = req.headers['accesstoken'];
-    const xToken = req.headers['x-token'];
+    const xToken = req.headers['xtoken'];
     if (!accessToken || !xToken || !photo){
       return res.status(400).json({ 
         success: false, 
@@ -101,7 +101,7 @@ export const getProfileInfo = async (req, res) => {
 
   try {
     // Get X-token from request headers
-    const xToken = req.headers['x-token'];
+    const xToken = req.headers['xtoken'];
     const accessToken = req.headers['accesstoken'];
     
     if (!accessToken || !xToken) {
@@ -133,7 +133,7 @@ export const getQrCode = async (req, res) => {
 
   try {
     // Get X-token from request headers
-    const xToken = req.headers['x-token'];
+    const xToken = req.headers['xtoken'];
     const accessToken = req.headers['accesstoken'];
     
     if (!accessToken || !xToken) {
@@ -165,7 +165,7 @@ export const getAbhaCard = async (req, res) => {
 
   try {
     // Get X-token from request headers
-    const xToken = req.headers['x-token'];
+    const xToken = req.headers['xtoken'];
     const accessToken = req.headers['accesstoken'];
     
     if (!accessToken || !xToken) {
@@ -196,7 +196,7 @@ export const logout = async (req, res) => {
 
   try {
     // Get X-token from request headers
-    const xToken = req.headers['x-token'];
+    const xToken = req.headers['xtoken'];
     const accessToken = req.headers['accesstoken'];
     
     if (!accessToken || !xToken) {

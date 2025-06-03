@@ -1,16 +1,17 @@
 import reactivate from '../models/reactivate.js';
 export const requestLoginOtp = async (req, res) => {
   try {
-    const { abhaNumber } = req.body;
+    const { loginId } = req.body;
     const access_token = req.headers['accesstoken'];
-    if (!abhaNumber || !access_token) {
+
+    if (!loginId || !access_token) {
       return res.status(400).json({ 
         success: false, 
         message: 'Abha number and accesstoken is required' 
       });
     }
     
-    const response = await reactivate.requestLoginOtp(access_token, abhaNumber);
+    const response = await reactivate.requestLoginOtp(access_token, loginId);
     
     res.status(200).json({ 
       success: true, 

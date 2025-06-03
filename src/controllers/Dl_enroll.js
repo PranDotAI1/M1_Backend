@@ -21,10 +21,13 @@ export const sendDlOtp = async (req, res) => {
   }
 };
 
+
+
+
 export const verifyDlOtp = async (req, res) => {
   try {
     const { txnId, otpValue } = req.body;
-    // 
+    console.log(req.headers, req.body);
     const accessToken = req.headers['accesstoken'];
     if (!accessToken || !txnId || !otpValue ) {
       return res.status(400).json({ 
@@ -56,12 +59,7 @@ export const createENumber = async (req, res) => {
     const { txnId,  DL_number, First_Name, Middle_Name, Last_Name, d_o_b, gender, base_front_photo, base_back_photo, Address, state, District, Pincode } = req.body;
     // 
     const accessToken = req.headers['accesstoken'];
-    if (!accessToken || !txnId || !DL_number || !First_Name || !Middle_Name || !Last_Name || !d_o_b || !gender || !base_front_photo || !base_back_photo || !Address || !state || !District || !Pincode) {   
-      return res.status(400).json({ 
-        success: false, 
-        message: 'accesstoken, txnId and otpValue are required' 
-      });
-    }
+
     
     const response = await DLenroll.verifyDlOtp({accessToken, txnId, DL_number, First_Name, Middle_Name, Last_Name, d_o_b, gender, base_front_photo, base_back_photo, Address, state, District, Pincode });
     

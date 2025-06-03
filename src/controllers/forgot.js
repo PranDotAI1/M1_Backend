@@ -2,16 +2,16 @@ import forgot from '../models/forgot.js';
 
 export const requestMobileOtp = async (req, res) => {
   try {
-    const { mobile } = req.body;
+    const { loginId } = req.body;
     const access_token = req.headers['accesstoken'];
-    if (!mobile || !access_token) {
+    if (!loginId || !access_token) {
       return res.status(400).json({ 
         success: false, 
         message: 'mobile and accesstoken is required' 
       });
     }
     
-    const response = await forgot.requestMobileOtp(access_token, mobile);
+    const response = await forgot.requestMobileOtp(access_token, loginId);
     
     res.status(200).json({ 
       success: true, 
@@ -63,16 +63,16 @@ export const verifyMobileOtp = async (req, res) => {
 
 export const requestAadharOtp = async (req, res) => {
   try {
-    const { aadhar } = req.body;
+    const { loginId } = req.body;
     const access_token = req.headers['accesstoken'];
-    if (!aadhar || !access_token) {
+    if (!loginId || !access_token) {
       return res.status(400).json({ 
         success: false, 
         message: 'Aadhar number and accesstoken is required' 
       });
     }
     
-    const response = await forgot.requestAadharOtp(access_token, aadhar);
+    const response = await forgot.requestAadharOtp(access_token, loginId);
     
     res.status(200).json({ 
       success: true, 

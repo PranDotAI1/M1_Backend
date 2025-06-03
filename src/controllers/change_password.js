@@ -1,17 +1,17 @@
 import changePassword from '../models/change_password.js';
 export const requestLoginOtp = async (req, res) => {
   try {
-    const { password } = req.body;
+    const { loginId } = req.body;
     const access_token = req.headers['accesstoken'];
-    const X_token = req.headers['X_token'];
-    if (!password || !X_token || !access_token) {
+    const X_token = req.headers['xtoken'];
+    if (!loginId || !X_token || !access_token) {
       return res.status(400).json({ 
         success: false, 
         message: 'password, X_token and accesstoken is required' 
       });
     }
     
-    const response = await changePassword.requestLoginOtp(access_token, X_token, password);
+    const response = await changePassword.requestLoginOtp(access_token, X_token, loginId);
     
     res.status(200).json({ 
       success: true, 
@@ -35,7 +35,7 @@ export const verifyLoginOtp = async (req, res) => {
   try {
     const { txnId, otp } = req.body;
     const accessToken = req.headers['accesstoken'];
-    const X_token = req.headers['X_token'];
+    const X_token = req.headers['xtoken'];
     if (!accessToken || !X_token || !txnId || !otp) {
       return res.status(400).json({ 
         success: false, 
