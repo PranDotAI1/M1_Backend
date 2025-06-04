@@ -60,19 +60,52 @@ export const verifyLoginOtp = async (req, res) => {
   }
 };
 
-export const verifyuser = async (req, res) => {
+
+export const fetchAbha = async (req, res) => {
   try {
-    const { txnId, abhanumber } = req.body;
-    const accessToken = req.headers['accesstoken'];
-    const Ttoken = req.headers['t-token'];
-    if (!accessToken || !txnId || !abhanumber || !Ttoken) {
+    const { loginId } = req.body;
+    const access_token = req.headers['accesstoken'];
+    if (!loginId || !access_token) {
       return res.status(400).json({ 
         success: false, 
-        message: 'accesstoken, txnId, abhanumber and Ttoken are required' 
+        message: 'Abha number and accesstoken is required' 
       });
     }
     
-    const response = await mobilelogin.verifyuser({accessToken, Ttoken, txnId, abhanumber });
+    const response = await mobilelogin.fetchAbha(access_token, loginId);
+    
+    res.status(200).json({ 
+      success: true, 
+      data: response 
+    });
+  } catch (error) {
+    console.error('Error in fetch Abha controller:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while login with ABHA',
+      error: error.response || null
+    });
+  }
+};
+
+
+// Verify OTP for ABHA login
+
+export const verifypass = async (req, res) => {
+  try {
+    console.log('Access Token:', req.headers, req.body);
+    const { loginId, password } = req.body;
+    const accessToken = req.headers['accesstoken'];
+    console.log('Access Token:', req.headers, req.body);
+    if (!accessToken || !loginId || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'accesstoken, loginId and password are required' 
+      });
+    }
+    
+    const response = await mobilelogin.verifypass({accessToken, loginId, password });
     
     // Return both the data and the X-token to the frontend
     res.status(200).json({ 
@@ -81,12 +114,14 @@ export const verifyuser = async (req, res) => {
       xToken: response.xToken // Frontend will store this
     });
   } catch (error) {
-    console.error('Error in verifyuser controller:', error);
+    console.error('Error in verify password controller:', error);
     
     res.status(error.status || 500).json({ 
       success: false, 
-      message: error.message || 'An error occurred while verifying user',
+      message: error.message || 'An error occurred while login with ABHA',
       error: error.response || null
     });
   }
 };
+
+

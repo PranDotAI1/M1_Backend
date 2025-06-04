@@ -59,5 +59,7 @@ router.post('/update/email/send-otp', emailController.requestOtp);
 router.post('/update/email/verify-otp', emailController.verifyOtp);
 router.post('/profile/singlelogin/api', singleapiController.requestLoginOtp);
 router.post('/profile/singlelogin/api/verify-otp', singleapiController.verifyLoginOtp);
+router.post('/profile/login/verify-password', singleapiController.verifypass);
+router.post('/profile/login/fetch-abha', singleapiController.fetchAbha);
 
 export default router;
