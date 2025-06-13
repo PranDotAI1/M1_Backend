@@ -57,6 +57,8 @@ router.patch('/profile/photo', abhaenrollController.getphoto);
 router.post('/account/verify', loginmobileController.verifyuser);
 router.post('/update/email/send-otp', emailController.requestOtp);
 router.post('/update/email/verify-otp', emailController.verifyOtp);
+router.post('/update/mobile/send-otp', emailController.requestMobileOtp);
+router.post('/update/mobile/verify-otp', emailController.verifyMobileOtp);
 router.post('/profile/singlelogin/api', singleapiController.requestLoginOtp);
 router.post('/profile/singlelogin/api/verify-otp', singleapiController.verifyLoginOtp);
 router.post('/profile/login/verify-password', singleapiController.verifypass);
