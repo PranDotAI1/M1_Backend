@@ -130,7 +130,6 @@ export const getProfileInfo = async (req, res) => {
 
 
 export const getQrCode = async (req, res) => {
-
   try {
     // Get X-token from request headers
     const xToken = req.headers['xtoken'];
@@ -142,13 +141,11 @@ export const getQrCode = async (req, res) => {
         message: 'X-token and accessToken is required in request headers' 
       });
     }
+    
     const response = await Aadhaarenroll.getQrCode(accessToken, xToken);
     
-    
-    res.status(200).json({ 
-      success: true, 
-      data: response 
-    });
+    // Simply pipe the response through without modification
+    res.status(200).send(response);
   } catch (error) {
     console.error('Error in getQrCodeinfo controller:', error);
     
@@ -159,6 +156,7 @@ export const getQrCode = async (req, res) => {
     });
   }
 };
+
 
 
 export const getAbhaCard = async (req, res) => {
