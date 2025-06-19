@@ -6,13 +6,30 @@ import path from 'path';
 import fs from 'fs';
 import https from 'https';
 
-
-
 dotenv.config();
+
+// Function to clear folders
+const clearFolders = () => {
+  const folders = ['./qr_codes', './abha_cards'];
+  
+  folders.forEach(folder => {
+    if (fs.existsSync(folder)) {
+      const files = fs.readdirSync(folder);
+      files.forEach(file => {
+        const filePath = path.join(folder, file);
+        try {
+          fs.unlinkSync(filePath);
+          console.log(`Deleted: ${filePath}`);
+        } catch (error) {
+          console.error(`Error deleting file ${filePath}:`, error);
+        }
+      });
+    }
+  });
+};
 
 const sendAadhaarOtp = async (accessToken, loginId) => {
   try {
-
     const response = await axios.post(
       `${config.abdm.abhaBaseUrl}/api/v3/enrollment/request/otp`,
       {
@@ -39,15 +56,11 @@ const sendAadhaarOtp = async (accessToken, loginId) => {
   }
 };
 
-
 const verifyAadhaarOtp = async ({ accessToken, txnId, otpValue, mobile }) => {
   try {
-
-
     if (!accessToken || !txnId || !otpValue || !mobile) {
       throw new Error('Missing required parameters: accesstoken, txnId, otpValue, or mobile');
     }
-
 
     const response = await axios.post(
       `${config.abdm.abhaBaseUrl}/api/v3/enrollment/enrol/byAadhaar`,
@@ -86,8 +99,7 @@ const verifyAadhaarOtp = async ({ accessToken, txnId, otpValue, mobile }) => {
   }
 };
 
-//  Get ABHA profile information
-
+// Get ABHA profile information
 const getProfileInfo = async (accessToken, xToken) => {
   try {
     const response = await axios.get(
@@ -114,38 +126,17 @@ const getProfileInfo = async (accessToken, xToken) => {
   }
 };
 
-const getAbhaCard = async (accessToken, xToken) => {
-  try {
-    const response = await axios.get(
-      `${config.abdm.abhaBaseUrl}/api/v3/profile/account/abha-card`,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-token': `Bearer ${xToken}`,
-          'REQUEST-ID': crypto.randomUUID(),
-          'TIMESTAMP': new Date().toISOString(),
-          'User-Agent': 'ABHA-Integration/1.0'
-        }
-      }
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching Abha card info:', error.response?.data || error.message);
-    throw {
-      status: error.response?.status || 500,
-      message: error.response?.data?.message || 'Failed to fetch Abha card information',
-      response: error.response?.data
-    };
-  }
-};
-
-
-
-// Create output folder if it doesn't exist
+// Create output folders if they don't exist and clear them
 if (!fs.existsSync('./qr_codes')) {
     fs.mkdirSync('./qr_codes', { recursive: true });
 }
+
+if (!fs.existsSync('./abha_cards')) {
+    fs.mkdirSync('./abha_cards', { recursive: true });
+}
+
+// Clear folders on module load
+clearFolders();
 
 function generateRequestId() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -160,89 +151,224 @@ function generateTimestamp() {
 }
 
 function downloadQRCode(accessToken, xtoken) {
-    const url = new URL(`${config.abdm.abhaBaseUrl}/api/v3/profile/account/qrCode`);
-    
-    const options = {
-        hostname: url.hostname,
-        port: 443,
-        path: url.pathname,
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'User-Agent': 'NodeJS-ABHA-Client/1.0.0',
-            'Accept': '*/*',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'X-token': `Bearer ${xtoken}`,
-            'REQUEST-ID': generateRequestId(),
-            'TIMESTAMP': generateTimestamp()
-        }
-    };
+    return new Promise((resolve, reject) => {
+        const url = new URL(`${config.abdm.abhaBaseUrl}/api/v3/profile/account/qrCode`);
+        
+        const options = {
+            hostname: url.hostname,
+            port: 443,
+            path: url.pathname,
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'NodeJS-ABHA-Client/1.0.0',
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'X-token': `Bearer ${xtoken}`,
+                'REQUEST-ID': generateRequestId(),
+                'TIMESTAMP': generateTimestamp()
+            }
+        };
 
-    console.log('Making request to ABHA API...');
-    
-    const req = https.request(options, (res) => {
-        console.log(`Status Code: ${res.statusCode}`);
-        console.log(`Headers:`, res.headers);
+        console.log('Making request to ABHA API for QR Code...');
+        
+        const req = https.request(options, (res) => {
+            console.log(`QR Code Status Code: ${res.statusCode}`);
+            console.log(`QR Code Headers:`, res.headers);
 
-        if (res.statusCode === 200 || res.statusCode === 202) {
-            const filePath = path.join('./qr_codes', 'abha_qr_code.png');
-            const fileStream = fs.createWriteStream(filePath);
-            
-            res.pipe(fileStream);
-            
-            fileStream.on('finish', () => {
-                fileStream.close();
-                console.log(`QR Code saved successfully to: ${filePath}`);
+            if (res.statusCode === 200 || res.statusCode === 202) {
+                const filePath = path.join('./qr_codes', 'abha_qr_code.png');
+                const fileStream = fs.createWriteStream(filePath);
                 
-                // Get file size
-                const stats = fs.statSync(filePath);
-                console.log(`File size: ${(stats.size / 1024).toFixed(2)} KB`);
-            });
-            
-            fileStream.on('error', (err) => {
-                console.error('Error writing file:', err);
-                fs.unlink(filePath, () => {}); // Delete the file on error
-            });
-        } else {
-            let data = '';
-            res.on('data', (chunk) => {
-                data += chunk;
-            });
-            
-            res.on('end', () => {
-                console.error(`API Error (${res.statusCode}):`, data);
-            });
-        }
-    });
+                res.pipe(fileStream);
+                
+                fileStream.on('finish', () => {
+                    fileStream.close();
+                    console.log(`QR Code saved successfully to: ${filePath}`);
+                    
+                    // Get file size
+                    const stats = fs.statSync(filePath);
+                    console.log(`QR Code file size: ${(stats.size / 1024).toFixed(2)} KB`);
+                    resolve({ success: true, filePath, size: stats.size });
+                });
+                
+                fileStream.on('error', (err) => {
+                    console.error('Error writing QR Code file:', err);
+                    fs.unlink(filePath, () => {}); // Delete the file on error
+                    reject({
+                        status: 500,
+                        message: 'Error writing QR Code file',
+                        response: { error: err.message }
+                    });
+                });
+            } else {
+                let data = '';
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+                
+                res.on('end', () => {
+                    console.error(`QR Code API Error (${res.statusCode}):`, data);
+                    let errorResponse;
+                    try {
+                        errorResponse = JSON.parse(data);
+                    } catch (e) {
+                        errorResponse = { error: data };
+                    }
+                    reject({
+                        status: res.statusCode,
+                        message: errorResponse.message || `API Error: ${res.statusCode}`,
+                        response: errorResponse
+                    });
+                });
+            }
+        });
 
-    req.on('error', (err) => {
-        console.error('Request Error:', err);
-    });
+        req.on('error', (err) => {
+            console.error('QR Code Request Error:', err);
+            reject({
+                status: 500,
+                message: 'Network error while downloading QR Code',
+                response: { error: err.message }
+            });
+        });
 
-    req.on('timeout', () => {
-        console.error('Request timeout');
-        req.destroy();
-    });
+        req.on('timeout', () => {
+            console.error('QR Code Request timeout');
+            req.destroy();
+            reject({
+                status: 408,
+                message: 'Request timeout while downloading QR Code',
+                response: { error: 'Timeout' }
+            });
+        });
 
-    req.setTimeout(30000); // 30 seconds timeout
-    req.end();
+        req.setTimeout(30000); // 30 seconds timeout
+        req.end();
+    });
 }
 
+// Modified getAbhaCard function to download and save the ABHA card
+function getAbhaCard(accessToken, xtoken) {
+    return new Promise((resolve, reject) => {
+        const url = new URL(`${config.abdm.abhaBaseUrl}/api/v3/profile/account/abha-card`);
+        
+        const options = {
+            hostname: url.hostname,
+            port: 443,
+            path: url.pathname,
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'User-Agent': 'NodeJS-ABHA-Client/1.0.0',
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'X-token': `Bearer ${xtoken}`,
+                'REQUEST-ID': generateRequestId(),
+                'TIMESTAMP': generateTimestamp()
+            }
+        };
 
+        console.log('Making request to ABHA API for ABHA Card...');
+        
+        const req = https.request(options, (res) => {
+            console.log(`ABHA Card Status Code: ${res.statusCode}`);
+            console.log(`ABHA Card Headers:`, res.headers);
 
+            if (res.statusCode === 200 || res.statusCode === 202) {
+                // Determine file extension based on content type
+                const contentType = res.headers['content-type'] || '';
+                let fileExtension = 'pdf'; // Default to PDF
+                
+                if (contentType.includes('image/png')) {
+                    fileExtension = 'png';
+                } else if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
+                    fileExtension = 'jpg';
+                } else if (contentType.includes('application/pdf')) {
+                    fileExtension = 'pdf';
+                }
+
+                const filePath = path.join('./abha_cards', `abha_card.${fileExtension}`);
+                const fileStream = fs.createWriteStream(filePath);
+                
+                res.pipe(fileStream);
+                
+                fileStream.on('finish', () => {
+                    fileStream.close();
+                    console.log(`ABHA Card saved successfully to: ${filePath}`);
+                    
+                    // Get file size
+                    const stats = fs.statSync(filePath);
+                    console.log(`ABHA Card file size: ${(stats.size / 1024).toFixed(2)} KB`);
+                    resolve({ success: true, filePath, size: stats.size, extension: fileExtension });
+                });
+                
+                fileStream.on('error', (err) => {
+                    console.error('Error writing ABHA Card file:', err);
+                    fs.unlink(filePath, () => {}); // Delete the file on error
+                    reject({
+                        status: 500,
+                        message: 'Error writing ABHA Card file',
+                        response: { error: err.message }
+                    });
+                });
+            } else {
+                let data = '';
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+                
+                res.on('end', () => {
+                    console.error(`ABHA Card API Error (${res.statusCode}):`, data);
+                    let errorResponse;
+                    try {
+                        errorResponse = JSON.parse(data);
+                    } catch (e) {
+                        errorResponse = { error: data };
+                    }
+                    reject({
+                        status: res.statusCode,
+                        message: errorResponse.message || `API Error: ${res.statusCode}`,
+                        response: errorResponse
+                    });
+                });
+            }
+        });
+
+        req.on('error', (err) => {
+            console.error('ABHA Card Request Error:', err);
+            reject({
+                status: 500,
+                message: 'Network error while downloading ABHA Card',
+                response: { error: err.message }
+            });
+        });
+
+        req.on('timeout', () => {
+            console.error('ABHA Card Request timeout');
+            req.destroy();
+            reject({
+                status: 408,
+                message: 'Request timeout while downloading ABHA Card',
+                response: { error: 'Timeout' }
+            });
+        });
+
+        req.setTimeout(30000); // 30 seconds timeout
+        req.end();
+    });
+}
 
 const getphoto = async ({ accessToken, xToken, photo }) => {
   try {
-
-
     if (!accessToken || !xToken || !photo) {
       throw new Error('Missing required parameters: accesstoken, xtoken or photo');
     }
 
     const response = await axios.patch(
       `${config.abdm.abhaBaseUrl}/api/v3/profile/account`,
-
       {
         profilePhoto: photo
       },
@@ -267,7 +393,6 @@ const getphoto = async ({ accessToken, xToken, photo }) => {
     };
   }
 };
-
 
 const logout = async (accessToken, xToken) => {
   try {
@@ -295,9 +420,6 @@ const logout = async (accessToken, xToken) => {
   }
 };
 
-
-
-
 export default {
   sendAadhaarOtp,
   verifyAadhaarOtp,
@@ -305,5 +427,6 @@ export default {
   downloadQRCode,
   getAbhaCard,
   getphoto,
-  logout
+  logout,
+  clearFolders
 };

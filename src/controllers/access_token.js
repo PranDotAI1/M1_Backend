@@ -1,5 +1,6 @@
 import abhaService from '../services/abhaService.js';
-
+import path from 'path';
+import fs from 'fs';
 import Aadhaarenroll from '../models/Enroll_via_aadhar.js';
 
 /**
@@ -40,7 +41,6 @@ export const sendAadhaarOtp = async (req, res) => {
 export const verifyAadhaarOtp = async (req, res) => {
   try {
     const { txnId, otpValue, mobile } = req.body;
-    // 
     const accessToken = req.headers['accesstoken'];
     if (!accessToken || !txnId || !otpValue || !mobile) {
       return res.status(400).json({ 
@@ -69,7 +69,6 @@ export const verifyAadhaarOtp = async (req, res) => {
 export const getphoto = async (req, res) => {
   try {
     const { photo} = req.body;
-    // 
     const accessToken = req.headers['accesstoken'];
     const xToken = req.headers['xtoken'];
     if (!accessToken || !xToken || !photo){
@@ -96,11 +95,8 @@ export const getphoto = async (req, res) => {
   }
 };
 
-
 export const getProfileInfo = async (req, res) => {
-
   try {
-    // Get X-token from request headers
     const xToken = req.headers['xtoken'];
     const accessToken = req.headers['accesstoken'];
     
@@ -112,7 +108,6 @@ export const getProfileInfo = async (req, res) => {
     }
     const response = await Aadhaarenroll.getProfileInfo(accessToken, xToken);
     
-    
     res.status(200).json({ 
       success: true, 
       data: response 
@@ -120,18 +115,16 @@ export const getProfileInfo = async (req, res) => {
   } catch (error) {
     console.error('Error in getProfileInfo controller:', error);
     
-    res.status(error.response?.status || 500).json({ 
+    res.status(error.status || 500).json({ 
       success: false, 
       message: error.message || 'An error occurred while fetching profile information',
-      error: error.response?.data || null
+      error: error.response || null
     });
   }
 };
-
 
 export const getQrCode = async (req, res) => {
   try {
-    // Get X-token from request headers
     const xToken = req.headers['xtoken'];
     const accessToken = req.headers['accesstoken'];
     
@@ -142,27 +135,49 @@ export const getQrCode = async (req, res) => {
       });
     }
     
-    const response = await Aadhaarenroll.downloadQRCode(accessToken, xToken);
-    
-    // Simply pipe the response through without modification
+    try {
+      const response = await Aadhaarenroll.downloadQRCode(accessToken, xToken);
+      
+      // If successful, serve the QR code image
+      const imagePath = path.join(process.cwd(), './qr_codes', 'abha_qr_code.png');
+      
+      // Check if file exists
+      if (!fs.existsSync(imagePath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'QR code image not found'
+        });
+      }
+      
+      // Set appropriate headers for image response
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Content-Disposition', 'inline; filename="qrcode.png"');
+      
+      // Send the image file
+      res.sendFile(imagePath);
+      
+    } catch (downloadError) {
+      // Return the exact API error response
+      return res.status(downloadError.status || 500).json({
+        success: false,
+        message: downloadError.message || 'An error occurred while downloading QR Code',
+        error: downloadError.response || null
+      });
+    }
 
   } catch (error) {
-    console.error('Error in getQrCodeinfo controller:', error);
+    console.error('Error in getQrCode controller:', error);
     
-    res.status(error.response?.status || 500).json({ 
+    res.status(error.status || 500).json({ 
       success: false, 
-      message: error.message || 'An error occurred while fetching QRCode information',
-      error: error.response?.data || null
+      message: error.message || 'An error occurred while fetching QR Code',
+      error: error.response || null
     });
   }
 };
 
-
-
 export const getAbhaCard = async (req, res) => {
-
   try {
-    // Get X-token from request headers
     const xToken = req.headers['xtoken'];
     const accessToken = req.headers['accesstoken'];
     
@@ -172,28 +187,81 @@ export const getAbhaCard = async (req, res) => {
         message: 'X-token and accessToken is required in request headers' 
       });
     }
-    const response = await Aadhaarenroll.getAbhaCard(accessToken, xToken);
     
-    
-    res.status(200).json({ 
-      success: true, 
-      data: response 
-    });
+    try {
+      // Call the service to download the ABHA card
+      const response = await Aadhaarenroll.getAbhaCard(accessToken, xToken);
+      
+      // Check for different possible file extensions
+      const cardDirectory = path.join(process.cwd(), './abha_cards');
+      const possibleExtensions = ['pdf', 'png', 'jpg', 'jpeg'];
+      let cardPath = null;
+      let contentType = 'application/pdf'; // Default to PDF
+      let filename = 'abha_card.pdf'; // Default filename
+      
+      // Find the actual file that was downloaded
+      for (const ext of possibleExtensions) {
+        const testPath = path.join(cardDirectory, `abha_card.${ext}`);
+        if (fs.existsSync(testPath)) {
+          cardPath = testPath;
+          
+          // Set appropriate content type and filename based on extension
+          switch (ext) {
+            case 'pdf':
+              contentType = 'application/pdf';
+              filename = 'abha_card.pdf';
+              break;
+            case 'png':
+              contentType = 'image/png';
+              filename = 'abha_card.png';
+              break;
+            case 'jpg':
+            case 'jpeg':
+              contentType = 'image/jpeg';
+              filename = `abha_card.${ext}`;
+              break;
+          }
+          break;
+        }
+      }
+      
+      // Check if file exists
+      if (!cardPath || !fs.existsSync(cardPath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'ABHA card file not found'
+        });
+      }
+      
+      // Set appropriate headers for file response
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      
+      // Send the file
+      res.sendFile(cardPath);
+      
+    } catch (downloadError) {
+      // Return the exact API error response
+      return res.status(downloadError.status || 500).json({
+        success: false,
+        message: downloadError.message || 'An error occurred while downloading ABHA Card',
+        error: downloadError.response || null
+      });
+    }
+
   } catch (error) {
-    console.error('Error in Abha card info controller:', error);
+    console.error('Error in getAbhaCard controller:', error);
     
-    res.status(error.response?.status || 500).json({ 
+    res.status(error.status || 500).json({ 
       success: false, 
-      message: error.message || 'An error occurred while fetching abha card information',
-      error: error.response?.data || null
+      message: error.message || 'An error occurred while fetching ABHA card',
+      error: error.response || null
     });
   }
 };
 
 export const logout = async (req, res) => {
-
   try {
-    // Get X-token from request headers
     const xToken = req.headers['xtoken'];
     const accessToken = req.headers['accesstoken'];
     
@@ -205,7 +273,6 @@ export const logout = async (req, res) => {
     }
     const response = await Aadhaarenroll.logout(accessToken, xToken);
     
-    
     res.status(200).json({ 
       success: true, 
       data: response 
@@ -213,10 +280,10 @@ export const logout = async (req, res) => {
   } catch (error) {
     console.error('Error in logout:', error);
     
-    res.status(error.response?.status || 500).json({ 
+    res.status(error.status || 500).json({ 
       success: false, 
       message: error.message || 'An error occurred while logout',
-      error: error.response?.data || null
+      error: error.response || null
     });
   }
 };
