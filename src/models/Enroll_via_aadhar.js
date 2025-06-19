@@ -2,6 +2,10 @@ import axios from 'axios';
 import config from '../config/index.js';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import https from 'https';
+
 
 
 dotenv.config();
@@ -137,31 +141,96 @@ const getAbhaCard = async (accessToken, xToken) => {
 };
 
 
-const getQrCode = async (accessToken, xToken) => {
-  try {
-    const response = await axios.get(
-      `${config.abdm.abhaBaseUrl}/api/v3/profile/account/qrCode`,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-token': `Bearer ${xToken}`,
-          'REQUEST-ID': crypto.randomUUID(),
-          'TIMESTAMP': new Date().toISOString(),
-          'User-Agent': 'ABHA-Integration/1.0'
-        }
-      }
-    );
 
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching QRcode info:', error.response?.data || error.message);
-    throw {
-      status: error.response?.status || 500,
-      message: error.response?.data?.message || 'Failed to fetch QRcode information',
-      response: error.response?.data
+// Create output folder if it doesn't exist
+if (!fs.existsSync('./qr_codes')) {
+    fs.mkdirSync('./qr_codes', { recursive: true });
+}
+
+function generateRequestId() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function generateTimestamp() {
+    return new Date().toISOString();
+}
+
+function downloadQRCode(accessToken, xtoken) {
+    const url = new URL(`${config.abdm.abhaBaseUrl}/api/v3/profile/account/qrCode`);
+    
+    const options = {
+        hostname: url.hostname,
+        port: 443,
+        path: url.pathname,
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'User-Agent': 'NodeJS-ABHA-Client/1.0.0',
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'X-token': `Bearer ${xtoken}`,
+            'REQUEST-ID': generateRequestId(),
+            'TIMESTAMP': generateTimestamp()
+        }
     };
-  }
-};
+
+    console.log('Making request to ABHA API...');
+    
+    const req = https.request(options, (res) => {
+        console.log(`Status Code: ${res.statusCode}`);
+        console.log(`Headers:`, res.headers);
+
+        if (res.statusCode === 200 || res.statusCode === 202) {
+            const filePath = path.join('./qr_codes', 'abha_qr_code.png');
+            const fileStream = fs.createWriteStream(filePath);
+            
+            res.pipe(fileStream);
+            
+            fileStream.on('finish', () => {
+                fileStream.close();
+                console.log(`QR Code saved successfully to: ${filePath}`);
+                
+                // Get file size
+                const stats = fs.statSync(filePath);
+                console.log(`File size: ${(stats.size / 1024).toFixed(2)} KB`);
+            });
+            
+            fileStream.on('error', (err) => {
+                console.error('Error writing file:', err);
+                fs.unlink(filePath, () => {}); // Delete the file on error
+            });
+        } else {
+            let data = '';
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+            
+            res.on('end', () => {
+                console.error(`API Error (${res.statusCode}):`, data);
+            });
+        }
+    });
+
+    req.on('error', (err) => {
+        console.error('Request Error:', err);
+    });
+
+    req.on('timeout', () => {
+        console.error('Request timeout');
+        req.destroy();
+    });
+
+    req.setTimeout(30000); // 30 seconds timeout
+    req.end();
+}
+
+
+
 
 const getphoto = async ({ accessToken, xToken, photo }) => {
   try {
@@ -233,7 +302,7 @@ export default {
   sendAadhaarOtp,
   verifyAadhaarOtp,
   getProfileInfo,
-  getQrCode,
+  downloadQRCode,
   getAbhaCard,
   getphoto,
   logout

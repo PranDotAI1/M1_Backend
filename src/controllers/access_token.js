@@ -142,10 +142,10 @@ export const getQrCode = async (req, res) => {
       });
     }
     
-    const response = await Aadhaarenroll.getQrCode(accessToken, xToken);
+    const response = await Aadhaarenroll.downloadQRCode(accessToken, xToken);
     
     // Simply pipe the response through without modification
-    res.status(200).send(response);
+
   } catch (error) {
     console.error('Error in getQrCodeinfo controller:', error);
     
