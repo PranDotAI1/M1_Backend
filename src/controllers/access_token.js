@@ -50,14 +50,35 @@ export const verifyAadhaarOtp = async (req, res) => {
     }
     
     const response = await Aadhaarenroll.verifyAadhaarOtp({accessToken, txnId, otpValue, mobile });
-    
+    // Save user details if account created
+    if (response && response.ABHAProfile) {
+      const profile = response.ABHAProfile;
+      const userDetails = {
+        mobile: profile.mobile || mobile,
+        abha: profile.ABHANumber,
+        name: [profile.firstName, profile.middleName, profile.lastName].filter(Boolean).join(' '),
+        dob: profile.dob,
+        gender: profile.gender,
+        address: profile.address,
+        phrAddress: Array.isArray(profile.phrAddress) ? profile.phrAddress[0] : profile.phrAddress,
+        pinCode: profile.pinCode,
+        stateName: profile.stateName,
+        districtName: profile.districtName,
+        abhaType: profile.abhaType,
+        abhaStatus: profile.abhaStatus
+      };
+      const { saveUserDetails } = await import('../utils/userSaver.js');
+      await saveUserDetails(userDetails);
+    }
     res.status(200).json({ 
       success: true, 
       data: response 
     });
   } catch (error) {
     console.error('Error in verifyAadhaarOtp controller:', error);
-    
+    // Log error to DB with response
+    const { logError } = await import('../utils/errorLogger.js');
+    await logError('access_token/verifyAadhaarOtp', error.message, error.response || null);
     res.status(error.status || 500).json({ 
       success: false, 
       message: error.message || 'An error occurred while verifying OTP',

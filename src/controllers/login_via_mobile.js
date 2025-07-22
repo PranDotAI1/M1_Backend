@@ -42,7 +42,19 @@ export const verifyLoginOtp = async (req, res) => {
     }
     
     const response = await mobilelogin.verifyLoginOtp({accessToken, txnId, otp });
-    
+    // Save user details if login is successful
+    if (response && response.accounts && response.accounts.length > 0) {
+      const acc = response.accounts[0];
+      const userDetails = {
+        mobile: response.mobile || acc.mobile,
+        abha: acc.ABHANumber,
+        name: acc.name,
+        abhaStatus: acc.status,
+        phrAddress: acc.preferredAbhaAddress
+      };
+      const { saveUserDetails } = await import('../utils/userSaver.js');
+      await saveUserDetails(userDetails);
+    }
     // Return both the data and the X-token to the frontend
     res.status(200).json({ 
       success: true, 
@@ -51,7 +63,9 @@ export const verifyLoginOtp = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in verifyLoginOtp controller:', error);
-    
+    // Log error to DB with response
+    const { logError } = await import('../utils/errorLogger.js');
+    await logError('login_via_mobile/verifyLoginOtp', error.message, error.response || null);
     res.status(error.status || 500).json({ 
       success: false, 
       message: error.message || 'An error occurred while verifying login OTP',

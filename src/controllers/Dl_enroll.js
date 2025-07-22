@@ -37,14 +37,21 @@ export const verifyDlOtp = async (req, res) => {
     }
     
     const response = await DLenroll.verifyDlOtp({accessToken, txnId, otpValue });
-    
+    // Save user details if login is successful
+    if (response && response.dl) {
+      const { dl, name, email } = response;
+      const { saveUserDetails } = await import('../utils/userSaver.js');
+      await saveUserDetails({ dl, name, email });
+    }
     res.status(200).json({ 
       success: true, 
       data: response 
     });
   } catch (error) {
-    console.error('Error in verifyAadhaarOtp controller:', error);
-    
+    console.error('Error in verifyDlOtp controller:', error);
+    // Log error to DB with response
+    const { logError } = await import('../utils/errorLogger.js');
+    await logError('Dl_enroll/verifyDlOtp', error.message, error.response || null);
     res.status(error.status || 500).json({ 
       success: false, 
       message: error.message || 'An error occurred while verifying OTP',
