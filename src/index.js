@@ -11,10 +11,7 @@ import abhaRoutes from './routes/routers.js';
 dotenv.config();
 
 // Connect to MongoDB
-mongoose.connect('mongodb://admin:Pran.ai@22@13.201.185.3:27017/ABDM?authSource=admin', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect('mongodb://admin:Pran.ai%4022@13.201.185.3:27017/ABDM?authSource=admin');
 mongoose.connection.on('error', err => {
   console.error('MongoDB connection error:', err);
 });
