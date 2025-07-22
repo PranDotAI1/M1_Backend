@@ -3,7 +3,6 @@ import config from '../config/index.js';
 import crypto from 'crypto';
 
 
-
 const requestLoginOtp = async (accessToken, loginId, scope, loginHint, otpSystem) => {
   try {
 

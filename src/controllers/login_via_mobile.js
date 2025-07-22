@@ -42,19 +42,6 @@ export const verifyLoginOtp = async (req, res) => {
     }
     
     const response = await mobilelogin.verifyLoginOtp({accessToken, txnId, otp });
-    // Save user details if login is successful
-    if (response && response.accounts && response.accounts.length > 0) {
-      const acc = response.accounts[0];
-      const userDetails = {
-        mobile: response.mobile || acc.mobile,
-        abha: acc.ABHANumber,
-        name: acc.name,
-        abhaStatus: acc.status,
-        phrAddress: acc.preferredAbhaAddress
-      };
-      const { saveUserDetails } = await import('../utils/userSaver.js');
-      await saveUserDetails(userDetails);
-    }
     // Return both the data and the X-token to the frontend
     res.status(200).json({ 
       success: true, 

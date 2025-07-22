@@ -28,7 +28,7 @@ const requestMobileOtp = async (accessToken, mobile) => {
           'TIMESTAMP': new Date().toISOString()
         }
       }
-    );
+      );
     
     return response.data;
   } catch (error) {
@@ -75,7 +75,7 @@ const verifyMobileOtp = async ({ accessToken, txnId, otp }) => {
           'TIMESTAMP': new Date().toISOString()
         }
       }
-    );
+      );
     
     // Return the response data along with the X-token from headers
     return {
@@ -118,7 +118,7 @@ const requestAadharOtp = async (accessToken, aadhar) => {
           'TIMESTAMP': new Date().toISOString()
         }
       }
-    );
+      );
     
     return response.data;
   } catch (error) {
@@ -165,7 +165,7 @@ const verifyAadharOtp = async ({ accessToken, txnId, otp }) => {
           'TIMESTAMP': new Date().toISOString()
         }
       }
-    );
+      );
     
     // Return the response data along with the X-token from headers
     return {

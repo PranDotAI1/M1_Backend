@@ -29,7 +29,7 @@ const requestLoginOtp = async (accessToken, X_token, abhaNumber) => {
           'TIMESTAMP': new Date().toISOString()
         }
       }
-    );
+      );
     
     return response.data;
   } catch (error) {
@@ -77,7 +77,7 @@ const verifyLoginOtp = async ({ accessToken, X_token, txnId, otp }) => {
           'TIMESTAMP': new Date().toISOString()
         }
       }
-    );
+      );
     
     // Return the response data along with the X-token from headers
     return {

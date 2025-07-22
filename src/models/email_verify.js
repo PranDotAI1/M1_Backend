@@ -29,7 +29,7 @@ const requestOtp = async (accessToken, X_token, email) => {
                     'TIMESTAMP': new Date().toISOString()
                 }
             }
-        );
+      );
 
         return response.data;
     } catch (error) {
@@ -77,7 +77,7 @@ const verifyOtp = async ({ accessToken, X_token, txnId, otp }) => {
                     'TIMESTAMP': new Date().toISOString()
                 }
             }
-        );
+      );
 
         // Return the response data along with the X-token from headers
         return {
@@ -123,7 +123,7 @@ const requestMobileOtp = async (accessToken, X_token, mobile) => {
                     'TIMESTAMP': new Date().toISOString()
                 }
             }
-        );
+      );
 
         return response.data;
     } catch (error) {
@@ -171,7 +171,7 @@ const verifyMobileOtp = async ({ accessToken, X_token, txnId, otp }) => {
                     'TIMESTAMP': new Date().toISOString()
                 }
             }
-        );
+      );
 
         // Return the response data along with the X-token from headers
         return {

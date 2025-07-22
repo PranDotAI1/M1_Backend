@@ -23,23 +23,22 @@ const getAccessToken = async () => {
 
   try {
     const response = await axios.post(
-      `${config.abdm.baseUrl}/sessions`,
-      {
-        clientId: config.abdm.clientId,
-        clientSecret: config.abdm.clientSecret,
-        grantType: 'client_credentials',
-
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'REQUEST-ID': crypto.randomUUID(),
-          'Accept': 'application/json',
-          'X-CM-ID': 'sbx',
-          'TIMESTAMP': new Date().toISOString()
+        `${config.abdm.baseUrl}/sessions`,
+        {
+          clientId: config.abdm.clientId,
+          clientSecret: config.abdm.clientSecret,
+          grantType: 'client_credentials'
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'REQUEST-ID': crypto.randomUUID(),
+            'Accept': 'application/json',
+            'X-CM-ID': 'sbx',
+            'TIMESTAMP': new Date().toISOString()
+          }
         }
-      }
-    );
+      );
 
     // Cache the token (assuming it expires in 20 min)
     accessTokenCache.token = response.data.accessToken;

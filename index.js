@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import abhaRoutes from './routes/routers.js';
-import UserModel from './models/user.js';
+
 
 // Load environment variables
 dotenv.config();
@@ -28,8 +28,7 @@ mongoose.connect('mongodb://admin:Pran.ai%4022@13.201.185.3:27017/ABDM?authSourc
         console.log('✅ Users collection exists');
         
         // Count users
-        const userCount = await UserModel.countDocuments();
-        console.log(`📊 Total users: ${userCount}`);
+        const userCount = await mongoose.model('User').countDocuments();
       }
     } catch (error) {
       console.error('❌ Error checking collections:', error);

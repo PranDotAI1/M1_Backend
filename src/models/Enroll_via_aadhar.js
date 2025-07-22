@@ -19,9 +19,8 @@ const clearFolders = () => {
         const filePath = path.join(folder, file);
         try {
           fs.unlinkSync(filePath);
-          console.log(`Deleted: ${filePath}`);
         } catch (error) {
-          console.error(`Error deleting file ${filePath}:`, error);
+          // Silently handle file deletion errors
         }
       });
     }
@@ -171,11 +170,7 @@ function downloadQRCode(accessToken, xtoken) {
             }
         };
 
-        console.log('Making request to ABHA API for QR Code...');
-        
         const req = https.request(options, (res) => {
-            console.log(`QR Code Status Code: ${res.statusCode}`);
-            console.log(`QR Code Headers:`, res.headers);
 
             if (res.statusCode === 200 || res.statusCode === 202) {
                 const filePath = path.join('./qr_codes', 'abha_qr_code.png');
@@ -185,16 +180,11 @@ function downloadQRCode(accessToken, xtoken) {
                 
                 fileStream.on('finish', () => {
                     fileStream.close();
-                    console.log(`QR Code saved successfully to: ${filePath}`);
-                    
-                    // Get file size
                     const stats = fs.statSync(filePath);
-                    console.log(`QR Code file size: ${(stats.size / 1024).toFixed(2)} KB`);
                     resolve({ success: true, filePath, size: stats.size });
                 });
                 
                 fileStream.on('error', (err) => {
-                    console.error('Error writing QR Code file:', err);
                     fs.unlink(filePath, () => {}); // Delete the file on error
                     reject({
                         status: 500,
@@ -209,7 +199,7 @@ function downloadQRCode(accessToken, xtoken) {
                 });
                 
                 res.on('end', () => {
-                    console.error(`QR Code API Error (${res.statusCode}):`, data);
+                    // Handle API error silently
                     let errorResponse;
                     try {
                         errorResponse = JSON.parse(data);
@@ -226,7 +216,7 @@ function downloadQRCode(accessToken, xtoken) {
         });
 
         req.on('error', (err) => {
-            console.error('QR Code Request Error:', err);
+            // Handle request error silently
             reject({
                 status: 500,
                 message: 'Network error while downloading QR Code',
@@ -235,7 +225,7 @@ function downloadQRCode(accessToken, xtoken) {
         });
 
         req.on('timeout', () => {
-            console.error('QR Code Request timeout');
+            // Handle timeout silently
             req.destroy();
             reject({
                 status: 408,
@@ -271,11 +261,7 @@ function getAbhaCard(accessToken, xtoken) {
             }
         };
 
-        console.log('Making request to ABHA API for ABHA Card...');
-        
         const req = https.request(options, (res) => {
-            console.log(`ABHA Card Status Code: ${res.statusCode}`);
-            console.log(`ABHA Card Headers:`, res.headers);
 
             if (res.statusCode === 200 || res.statusCode === 202) {
                 // Determine file extension based on content type
@@ -297,16 +283,11 @@ function getAbhaCard(accessToken, xtoken) {
                 
                 fileStream.on('finish', () => {
                     fileStream.close();
-                    console.log(`ABHA Card saved successfully to: ${filePath}`);
-                    
-                    // Get file size
                     const stats = fs.statSync(filePath);
-                    console.log(`ABHA Card file size: ${(stats.size / 1024).toFixed(2)} KB`);
                     resolve({ success: true, filePath, size: stats.size, extension: fileExtension });
                 });
                 
                 fileStream.on('error', (err) => {
-                    console.error('Error writing ABHA Card file:', err);
                     fs.unlink(filePath, () => {}); // Delete the file on error
                     reject({
                         status: 500,
@@ -321,7 +302,7 @@ function getAbhaCard(accessToken, xtoken) {
                 });
                 
                 res.on('end', () => {
-                    console.error(`ABHA Card API Error (${res.statusCode}):`, data);
+                    // Handle API error silently
                     let errorResponse;
                     try {
                         errorResponse = JSON.parse(data);
@@ -338,7 +319,7 @@ function getAbhaCard(accessToken, xtoken) {
         });
 
         req.on('error', (err) => {
-            console.error('ABHA Card Request Error:', err);
+            // Handle request error silently
             reject({
                 status: 500,
                 message: 'Network error while downloading ABHA Card',
@@ -347,7 +328,7 @@ function getAbhaCard(accessToken, xtoken) {
         });
 
         req.on('timeout', () => {
-            console.error('ABHA Card Request timeout');
+            // Handle timeout silently
             req.destroy();
             reject({
                 status: 408,
