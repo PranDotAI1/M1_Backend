@@ -1,7 +1,8 @@
 import mobilelogin from '../models/singleapi.js';
+
 export const requestLoginOtp = async (req, res) => {
   try {
-    const { scope, loginHint, loginId, otpSystem } = req.body;
+    const { loginId } = req.body;
     const access_token = req.headers['accesstoken'];
     if (!loginId || !access_token) {
       return res.status(400).json({ 
@@ -10,7 +11,7 @@ export const requestLoginOtp = async (req, res) => {
       });
     }
     
-    const response = await mobilelogin.requestLoginOtp(access_token, loginId, scope, loginHint, otpSystem);
+    const response = await mobilelogin.requestLoginOtp(access_token, loginId);
     
     res.status(200).json({ 
       success: true, 
@@ -32,7 +33,7 @@ export const requestLoginOtp = async (req, res) => {
 
 export const verifyLoginOtp = async (req, res) => {
   try {
-    const { scope, txnId, otp } = req.body;
+    const { txnId, otp } = req.body;
     const accessToken = req.headers['accesstoken'];
     if (!accessToken || !txnId || !otp) {
       return res.status(400).json({ 
@@ -41,13 +42,75 @@ export const verifyLoginOtp = async (req, res) => {
       });
     }
     
-    const response = await mobilelogin.verifyLoginOtp({accessToken, scope, txnId, otp });
+    const response = await mobilelogin.verifyLoginOtp({accessToken, txnId, otp });
     
     // Return both the data and the X-token to the frontend
     res.status(200).json({ 
       success: true, 
       data: response.data,
       xToken: response.xToken // Frontend will store this
+    });
+  } catch (error) {
+    console.error('Error in verifyLoginOtp controller:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while verifying login OTP',
+      error: error.response || null
+    });
+  }
+};
+
+
+
+export const searchprofile = async (req, res) => {
+  try {
+    const { address } = req.body;
+    const access_token = req.headers['accesstoken'];
+    if (!address || !access_token) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Address and accesstoken is required' 
+      });
+    }
+    
+    const response = await mobilelogin.searchprofile(access_token, address);
+    
+    res.status(200).json({ 
+      success: true, 
+      data: response 
+    });
+  } catch (error) {
+    console.error('Error in requestLoginOtp controller:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while requesting login OTP',
+      error: error.response || null
+    });
+  }
+};
+
+
+
+
+export const profileAddress = async (req, res) => {
+  try {
+    const accessToken = req.headers['accesstoken'];
+    const xToken = req.headers['x-token'];
+    if (!accessToken || !xToken) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'accesstoken and x-token are required' 
+      });
+    }
+    
+    const response = await mobilelogin.profileAddress({accessToken, xToken });
+    
+    // Return both the data and the X-token to the frontend
+    res.status(200).json({ 
+      success: true, 
+      data: response.data,
     });
   } catch (error) {
     console.error('Error in verifyLoginOtp controller:', error);
@@ -123,5 +186,4 @@ export const verifypass = async (req, res) => {
     });
   }
 };
-
 

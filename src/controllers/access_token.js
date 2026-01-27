@@ -111,9 +111,31 @@ export const getProfileInfo = async (req, res) => {
     const response = await Aadhaarenroll.getProfileInfo(accessToken, xToken);
     
     try {
+      // Map the profile response to include all the fields you want
+      const userDetailsForSaving = {
+        firstName: response.firstName,
+        middleName: response.middleName,
+        lastName: response.lastName,
+        name: response.name || `${response.firstName || ''} ${response.middleName || ''} ${response.lastName || ''}`.trim(),
+        mobile: response.mobile,
+        gender: response.gender,
+        yearOfBirth: response.yearOfBirth,
+        monthOfBirth: response.monthOfBirth,
+        dayOfBirth: response.dayOfBirth,
+        address: response.address,
+        ABHANumber: response.ABHANumber,
+        abhaaddress: response.phrAddress || response.preferredAbhaAddress || response.abhaAddress,
+        status: response.status,
+        pincode: response.pincode,
+        // Include original response data as fallback
+        ...response
+      };
+      
       const { saveUserDetails } = await import('../utils/userSaver.js');
-      await saveUserDetails(response);
+      await saveUserDetails(userDetailsForSaving);
+      console.log('✅ User profile saved successfully for ABHA:', userDetailsForSaving.ABHANumber);
     } catch (saveError) {
+      console.error('❌ Error saving user profile:', saveError.message);
       const { logError } = await import('../utils/errorLogger.js');
       await logError('access_token/getProfileInfo/saveUser', saveError.message, response);
     }
@@ -293,6 +315,94 @@ export const logout = async (req, res) => {
     res.status(error.status || 500).json({ 
       success: false, 
       message: error.message || 'An error occurred while logout',
+      error: error.response || null
+    });
+  }
+};
+
+export const sendEmailVerificationLink = async (req, res) => {
+  try {
+    const { loginId } = req.body;
+    const xToken = req.headers['xtoken'];
+    const accessToken = req.headers['accesstoken'];
+    
+    if (!accessToken || !xToken || !loginId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'accessToken, X-token and loginId are required' 
+      });
+    }
+    
+    const response = await Aadhaarenroll.sendEmailVerificationLink(accessToken, xToken, loginId);
+    
+    res.status(200).json({ 
+      success: true, 
+      data: response 
+    });
+  } catch (error) {
+    console.error('Error in sendEmailVerificationLink:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while sending email verification link',
+      error: error.response || null
+    });
+  }
+};
+
+export const getAbhaAddressSuggestions = async (req, res) => {
+  try {
+    const transactionId = req.headers['transaction-id'];
+    const accessToken = req.headers['accesstoken'];
+    
+    if (!accessToken || !transactionId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'accessToken and transaction-id are required in headers' 
+      });
+    }
+    
+    const response = await Aadhaarenroll.getAbhaAddressSuggestions(accessToken, transactionId);
+    
+    res.status(200).json({ 
+      success: true, 
+      data: response 
+    });
+  } catch (error) {
+    console.error('Error in getAbhaAddressSuggestions:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while fetching ABHA address suggestions',
+      error: error.response || null
+    });
+  }
+};
+
+export const createAbhaAddress = async (req, res) => {
+  try {
+    const { txnId, abhaAddress } = req.body;
+    const accessToken = req.headers['accesstoken'];
+    
+    if (!accessToken || !txnId || !abhaAddress) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'accessToken, txnId and abhaAddress are required' 
+      });
+    }
+    
+    const response = await Aadhaarenroll.createAbhaAddress(accessToken, txnId, abhaAddress);
+    
+    res.status(200).json({ 
+      success: true, 
+      data: response 
+    });
+  } catch (error) {
+    console.error('Error in createAbhaAddress:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while creating ABHA address',
       error: error.response || null
     });
   }

@@ -11,7 +11,7 @@ import UserModel from './models/user.js';
 dotenv.config();
 
 // Connect to MongoDB
-mongoose.connect('mongodb://admin:Pran.ai%4022@13.201.185.3:27017/ABDM?authSource=admin')
+mongoose.connect('mongodb://admin:Pran.ai%4022@13.201.185.3:27017/Patient_DB?authSource=admin')
   .then(async () => {
     console.log('✅ MongoDB Connected Successfully');
     
@@ -20,16 +20,16 @@ mongoose.connect('mongodb://admin:Pran.ai%4022@13.201.185.3:27017/ABDM?authSourc
       const collections = await mongoose.connection.db.listCollections().toArray();
       console.log('📚 Available collections:', collections.map(c => c.name));
       
-      // Check if users collection exists
-      const hasUsersCollection = collections.some(c => c.name === 'users');
-      if (!hasUsersCollection) {
-        console.log('⚠️ Users collection not found, will be created on first insert');
+      // Check if Patients collection exists
+      const hasPatientsCollection = collections.some(c => c.name === 'Patients');
+      if (!hasPatientsCollection) {
+        console.log('⚠️ Patients collection not found, will be created on first insert');
       } else {
-        console.log('✅ Users collection exists');
+        console.log('✅ Patients collection exists');
         
-        // Count users
-        const userCount = await UserModel.countDocuments();
-        console.log(`📊 Total users: ${userCount}`);
+        // Count patients
+        const patientCount = await UserModel.countDocuments();
+        console.log(`📊 Total patients: ${patientCount}`);
       }
     } catch (error) {
       console.error('❌ Error checking collections:', error);

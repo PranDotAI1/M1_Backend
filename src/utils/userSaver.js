@@ -14,65 +14,43 @@ export async function saveUserDetails(details) {
   try {
     await ensureConnection();
 
-    // Keep all original fields and add any additional mapped fields
+    // Only save required fields with correct mapping
     const userDetails = {
-      ...details,  // Preserve all original fields
-      mobile: details.mobile || details.mobileNumber,
-      aadhar: details.aadhar || details.aadhaar || details.aadhaarNumber,
-      abha: details.abha || details.ABHANumber || details.abhaNumber,
-      dl: details.dl || details.DL_number,
-      name: details.name || [details.First_Name, details.Middle_Name, details.Last_Name].filter(Boolean).join(' '),
-      email: details.email,
-      mobileVerified: details.mobileVerified,
-      verificationStatus: details.verificationStatus,
-      verificationType: details.verificationType,
-      kycVerified: details.kycVerified,
-      authMethods: details.authMethods || [],
-      profilePhoto: details.profilePhoto,
-      kycPhoto: details.kycPhoto,
-      status: details.status,
-      gender: details.gender,
-      yearOfBirth: details.yearOfBirth,
-      dayOfBirth: details.dayOfBirth,
-      monthOfBirth: details.monthOfBirth,
-      address: details.address,
-      pincode: details.pincode,
-      stateCode: details.stateCode,
-      stateName: details.stateName,
-      districtCode: details.districtCode,
-      districtName: details.districtName,
-      subdistrictName: details.subdistrictName,
-      townName: details.townName,
+      f_name: details.firstName || details.f_name || '',
+      m_name: details.middleName || details.m_name || '',
+      l_name: details.lastName || details.l_name || '',
+      name: details.name || details.fullName || '',
+      mobile: details.mobile || '',
+      dob: details.dob || `${details.yearOfBirth || ''}-${details.monthOfBirth || ''}-${details.dayOfBirth || ''}`,
+      address: details.address || '',
+      ABHANumber: details.ABHANumber || details.abha || '',
+      abhaaddress: details.abhaaddress || details.phrAddress || details.preferredAbhaAddress || '',
+      gender: details.gender || details.gander || '', // Handle both spellings
+      status: details.status || details.abhaStatus || '',
+      pincode: details.pincode || '',
       createdAt: details.createdAt || new Date()
     };
 
-    // Build search query
-    const searchQuery = { $or: [] };
-    for (const field of ['mobile', 'aadhar', 'abha', 'dl']) {
-      if (userDetails[field]) {
-        searchQuery.$or.push({ [field]: userDetails[field] });
-      }
-    }
-
-    if (!searchQuery.$or.length) {
-      await ErrorLog.create({
-        api: 'saveUserDetails',
-        error: 'No unique identifier provided in user details',
-        response: details
-      });
-      return false;
-    }
+    // Use ABHANumber and mobile as unique identifiers
+    const searchQuery = {
+      $or: [
+        { ABHANumber: userDetails.ABHANumber },
+        { mobile: userDetails.mobile }
+      ]
+    };
 
     const existingUser = await User.findOne(searchQuery);
-    
     if (existingUser) {
       await User.findByIdAndUpdate(existingUser._id, userDetails);
+      console.log('✅ User updated with new fields:', userDetails.ABHANumber);
     } else {
       await User.create(userDetails);
+      console.log('✅ New user created with fields:', userDetails.ABHANumber);
     }
 
     return true;
   } catch (err) {
+    console.error('❌ Error saving user details:', err.message);
     await ErrorLog.create({
       api: 'saveUserDetails',
       error: err.message,

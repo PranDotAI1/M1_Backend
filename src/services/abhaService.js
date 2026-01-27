@@ -6,21 +6,10 @@ import dotenv from 'dotenv';
 dotenv.config();  
 
 
-// Cache for the access token
-let accessTokenCache = {
-  token: null,
-  expiresAt: null
-};
-
 /**
- * Get access token for ABDM APIs
+ * Get access token for ABDM APIs - Always fetches a fresh token
  */
 const getAccessToken = async () => {
-  // Check if we have a valid cached token
-  if (accessTokenCache.token && accessTokenCache.expiresAt > Date.now()) {
-    return accessTokenCache.token;
-  }
-
   try {
     const response = await axios.post(
         `${config.abdm.baseUrl}/sessions`,
@@ -40,11 +29,8 @@ const getAccessToken = async () => {
         }
       );
 
-    // Cache the token (assuming it expires in 20 min)
-    accessTokenCache.token = response.data.accessToken;
-    accessTokenCache.expiresAt = Date.now() + 1200000; // 20 min  from now
-    
-    return response.data;
+    // Return only the accessToken string for consistent response
+    return response.data.accessToken;
   } catch (error) {
     console.error('Error getting access token:', error.response?.data || error.message);
     // Add more detailed error logging

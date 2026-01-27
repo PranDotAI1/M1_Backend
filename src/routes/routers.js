@@ -14,14 +14,20 @@ import * as dlController from '../controllers/Dl_enroll.js';
 import * as retrievalController from '../controllers/retrieval.js';
 import * as emailController from '../controllers/email_verify.js';
 import * as singleapiController from '../controllers/singleapi.js';
+import * as captchaController from '../controllers/captcha.js';
 
 const router = express.Router();
 
 router.post('/token', abhaenrollController.getAccessToken);
+router.get('/captcha/generate', captchaController.generateCaptcha);
+router.post('/captcha/validate', captchaController.validateCaptcha);
 
 
 router.post('/enrollment/aadhar/send-otp', abhaenrollController.sendAadhaarOtp);
 router.post('/enrollment/aadhar/verify-otp', abhaenrollController.verifyAadhaarOtp);
+router.post('/profile/email-verification-link', abhaenrollController.sendEmailVerificationLink);
+router.get('/enrollment/abha-address-suggestions', abhaenrollController.getAbhaAddressSuggestions);
+router.post('/enrollment/create-abha-address', abhaenrollController.createAbhaAddress);
 router.get('/profile', abhaenrollController.getProfileInfo);
 router.post('/login/mobile/send-otp', loginmobileController.requestLoginOtp);
 router.post('/login/mobile/verify-otp', loginmobileController.verifyLoginOtp);
@@ -63,5 +69,7 @@ router.post('/profile/singlelogin/api', singleapiController.requestLoginOtp);
 router.post('/profile/singlelogin/api/verify-otp', singleapiController.verifyLoginOtp);
 router.post('/profile/login/verify-password', singleapiController.verifypass);
 router.post('/profile/login/fetch-abha', singleapiController.fetchAbha);
+router.get('/profile/address', singleapiController.profileAddress);
+router.post('/profile/search', singleapiController.searchprofile);
 
 export default router;

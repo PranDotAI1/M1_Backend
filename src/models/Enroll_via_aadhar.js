@@ -401,6 +401,97 @@ const logout = async (accessToken, xToken) => {
   }
 };
 
+const sendEmailVerificationLink = async (accessToken, xToken, loginId) => {
+  try {
+    const response = await axios.post(
+      `${config.abdm.abhaBaseUrl}/api/v3/profile/account/request/emailVerificationLink`,
+      {
+        scope: [
+          "abha-profile",
+          "email-link-verify"
+        ],
+        loginHint: "email",
+        loginId: loginId,
+        otpSystem: "abdm"
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-token': `Bearer ${xToken}`,
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString(),
+          'User-Agent': 'ABHA-Integration/1.0'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error sending email verification link:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to send email verification link',
+      response: error.response?.data
+    };
+  }
+};
+
+const getAbhaAddressSuggestions = async (accessToken, transactionId) => {
+  try {
+    const response = await axios.get(
+      `${config.abdm.abhaBaseUrl}/api/v3/enrollment/enrol/suggestion`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Transaction_Id': transactionId,
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString(),
+          'User-Agent': 'ABHA-Integration/1.0'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching ABHA address suggestions:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to fetch ABHA address suggestions',
+      response: error.response?.data
+    };
+  }
+};
+
+const createAbhaAddress = async (accessToken, txnId, abhaAddress) => {
+  try {
+    const response = await axios.post(
+      `${config.abdm.abhaBaseUrl}/api/v3/enrollment/enrol/abha-address`,
+      {
+        txnId: txnId,
+        abhaAddress: abhaAddress,
+        preferred: 1
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString(),
+          'User-Agent': 'ABHA-Integration/1.0'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error creating ABHA address:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to create ABHA address',
+      response: error.response?.data
+    };
+  }
+};
+
 export default {
   sendAadhaarOtp,
   verifyAadhaarOtp,
@@ -409,5 +500,8 @@ export default {
   getAbhaCard,
   getphoto,
   logout,
+  sendEmailVerificationLink,
+  getAbhaAddressSuggestions,
+  createAbhaAddress,
   clearFolders
 };

@@ -61,8 +61,7 @@ export const createENumber = async (req, res) => {
     // 
     const accessToken = req.headers['accesstoken'];
 
-    
-    const response = await DLenroll.verifyDlOtp({accessToken, txnId, DL_number, First_Name, Middle_Name, Last_Name, d_o_b, gender, base_front_photo, base_back_photo, Address, state, District, Pincode });
+    const response = await DLenroll.createENumber({accessToken, txnId, DL_number, First_Name, Middle_Name, Last_Name, d_o_b, gender, base_front_photo, base_back_photo, Address, state, District, Pincode });
     
     res.status(200).json({ 
       success: true, 

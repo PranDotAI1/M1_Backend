@@ -103,7 +103,7 @@ const createENumber = async ({ accessToken, txnId,  DL_number, First_Name, Middl
     
 
         const response = await axios.post(
-            `${config.abdm.abhaBaseUrl}/api/v3/enrollment/auth/byAbdm`,
+            `${config.abdm.abhaBaseUrl}/api/v3/enrollment/enrol/byDocument`,
             {
                 txnId: txnId,
                 documentType: "DRIVING_LICENCE",
