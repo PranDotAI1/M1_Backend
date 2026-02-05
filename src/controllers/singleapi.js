@@ -124,6 +124,35 @@ export const profileAddress = async (req, res) => {
 };
 
 
+export const CardbyAddress = async (req, res) => {
+  try {
+    const accessToken = req.headers['accesstoken'];
+    const xToken = req.headers['x-token'];
+    if (!accessToken || !xToken) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'accesstoken and x-token are required' 
+      });
+    }
+    
+    const response = await mobilelogin.CardbyAddress({accessToken, xToken });
+    
+    // Return both the data and the X-token to the frontend
+    res.status(200).json({ 
+      success: true, 
+      data: response.data,
+    });
+  } catch (error) {
+    console.error('Error in verifyLoginOtp controller:', error);
+    
+    res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || 'An error occurred while verifying login OTP',
+      error: error.response || null
+    });
+  }
+};
+
 export const fetchAbha = async (req, res) => {
   try {
     const { loginId } = req.body;

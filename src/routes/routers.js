@@ -70,6 +70,7 @@ router.post('/profile/singlelogin/api/verify-otp', singleapiController.verifyLog
 router.post('/profile/login/verify-password', singleapiController.verifypass);
 router.post('/profile/login/fetch-abha', singleapiController.fetchAbha);
 router.get('/profile/address', singleapiController.profileAddress);
+router.get('/profile/cardbyaddress', singleapiController.CardbyAddress);
 router.post('/profile/search', singleapiController.searchprofile);
 
 export default router;

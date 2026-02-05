@@ -14,10 +14,10 @@ const requestLoginOtp = async (accessToken, loginId) => {
       {
         scope: [
                 "abha-address-login",
-                "aadhaar-verify"],
+                "mobile-verify"],
         loginHint: "abha-address",
         loginId: loginId,
-        otpSystem: "aadhaar"
+        otpSystem: "abdm"
       },
       {
         headers: {
@@ -55,7 +55,7 @@ const verifyLoginOtp = async ({ accessToken, txnId, otp }) => {
      {
     scope: [
         "abha-address-login",
-        "aadhaar-verify"],
+        "mobile-verify"],
 
     authData: {
         authMethods: [
@@ -164,6 +164,40 @@ const profileAddress = async ({ accessToken, xToken}) => {
   }
 };
 
+const CardbyAddress = async ({ accessToken, xToken}) => {
+  try {
+    
+    if (!accessToken || !xToken) {
+      throw new Error('Missing required parameters: accessToken, xToken');
+    }
+    
+    const response = await axios.get(
+      `${config.abdm.abhaBaseUrl}/api/v3/phr/web/login/profile/abha/phr-card`,
+
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'X-token': xToken,
+          'REQUEST-ID': crypto.randomUUID(),
+          'TIMESTAMP': new Date().toISOString()
+        }
+      }
+    );
+    
+    // Return the response data along with the X-token from headers
+    return {
+      data: response.data
+    };
+  } catch (error) {
+    console.error('Error verifying login OTP:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'Failed to verify login OTP',
+      response: error.response?.data
+    };
+  }
+};
 
 
 
@@ -258,5 +292,6 @@ export default {
   fetchAbha,
   verifypass,
   profileAddress,
+  CardbyAddress,
   searchprofile
 };
