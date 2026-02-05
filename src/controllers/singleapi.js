@@ -97,7 +97,7 @@ export const searchprofile = async (req, res) => {
 export const profileAddress = async (req, res) => {
   try {
     const accessToken = req.headers['accesstoken'];
-    const xToken = req.headers['x-token'];
+    const xToken = req.headers['xtoken'];
     if (!accessToken || !xToken) {
       return res.status(400).json({ 
         success: false, 
@@ -127,7 +127,7 @@ export const profileAddress = async (req, res) => {
 export const CardbyAddress = async (req, res) => {
   try {
     const accessToken = req.headers['accesstoken'];
-    const xToken = req.headers['x-token'];
+    const xToken = req.headers['xtoken'];
     if (!accessToken || !xToken) {
       return res.status(400).json({ 
         success: false, 
