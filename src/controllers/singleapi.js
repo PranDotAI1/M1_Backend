@@ -1,4 +1,6 @@
 import mobilelogin from '../models/singleapi.js';
+import path from 'path';
+import fs from 'fs';
 
 export const requestLoginOtp = async (req, res) => {
   try {
@@ -128,26 +130,81 @@ export const CardbyAddress = async (req, res) => {
   try {
     const accessToken = req.headers['accesstoken'];
     const xToken = req.headers['xtoken'];
+    
     if (!accessToken || !xToken) {
       return res.status(400).json({ 
         success: false, 
-        message: 'accesstoken and x-token are required' 
+        message: 'accesstoken and xtoken are required in request headers' 
       });
     }
     
-    const response = await mobilelogin.CardbyAddress({accessToken, xToken });
-    
-    // Return both the data and the X-token to the frontend
-    res.status(200).json({ 
-      success: true, 
-      data: response.data,
-    });
+    try {
+      // Call the service to download the PHR card
+      const response = await mobilelogin.CardbyAddress({ accessToken, xToken });
+      
+      // Check for different possible file extensions
+      const cardDirectory = path.join(process.cwd(), './abha_cards');
+      const possibleExtensions = ['pdf', 'png', 'jpg', 'jpeg'];
+      let cardPath = null;
+      let contentType = 'application/pdf'; // Default to PDF
+      let filename = 'phr_card.pdf'; // Default filename
+      
+      // Find the actual file that was downloaded
+      for (const ext of possibleExtensions) {
+        const testPath = path.join(cardDirectory, `phr_card_by_address.${ext}`);
+        if (fs.existsSync(testPath)) {
+          cardPath = testPath;
+          
+          // Set appropriate content type and filename based on extension
+          switch (ext) {
+            case 'pdf':
+              contentType = 'application/pdf';
+              filename = 'phr_card.pdf';
+              break;
+            case 'png':
+              contentType = 'image/png';
+              filename = 'phr_card.png';
+              break;
+            case 'jpg':
+            case 'jpeg':
+              contentType = 'image/jpeg';
+              filename = `phr_card.${ext}`;
+              break;
+          }
+          break;
+        }
+      }
+      
+      // Check if file exists
+      if (!cardPath || !fs.existsSync(cardPath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'PHR card file not found'
+        });
+      }
+      
+      // Set appropriate headers for file response
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      
+      // Send the file
+      res.sendFile(cardPath);
+      
+    } catch (downloadError) {
+      // Return the exact API error response
+      return res.status(downloadError.status || 500).json({
+        success: false,
+        message: downloadError.message || 'An error occurred while downloading PHR card',
+        error: downloadError.response || null
+      });
+    }
+
   } catch (error) {
-    console.error('Error in verifyLoginOtp controller:', error);
+    console.error('Error in CardbyAddress controller:', error);
     
     res.status(error.status || 500).json({ 
       success: false, 
-      message: error.message || 'An error occurred while verifying login OTP',
+      message: error.message || 'An error occurred while fetching PHR card',
       error: error.response || null
     });
   }
