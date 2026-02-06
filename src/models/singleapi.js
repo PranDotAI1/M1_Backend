@@ -143,7 +143,7 @@ const profileAddress = async ({ accessToken, xToken}) => {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'X-token': xToken,
+          'X-token': `Bearer ${xToken}`,
           'REQUEST-ID': crypto.randomUUID(),
           'TIMESTAMP': new Date().toISOString()
         }
@@ -178,7 +178,7 @@ const CardbyAddress = async ({ accessToken, xToken}) => {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'X-token': xToken,
+          'X-token': `Bearer ${xToken}`,
           'REQUEST-ID': crypto.randomUUID(),
           'TIMESTAMP': new Date().toISOString()
         }
