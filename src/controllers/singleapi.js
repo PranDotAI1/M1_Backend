@@ -4,16 +4,16 @@ import fs from 'fs';
 
 export const requestLoginOtp = async (req, res) => {
   try {
-    const { loginId } = req.body;
+    const { loginId, verify, otpsystem } = req.body;
     const access_token = req.headers['accesstoken'];
-    if (!loginId || !access_token) {
+    if (!loginId || !access_token || !verify || !otpsystem) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Mobile number and accesstoken is required' 
+        message: 'Mobile number, accesstoken, verify and otpsystem are required' 
       });
     }
     
-    const response = await mobilelogin.requestLoginOtp(access_token, loginId);
+    const response = await mobilelogin.requestLoginOtp(access_token, loginId, verify, otpsystem);
     
     res.status(200).json({ 
       success: true, 
@@ -35,16 +35,16 @@ export const requestLoginOtp = async (req, res) => {
 
 export const verifyLoginOtp = async (req, res) => {
   try {
-    const { txnId, otp } = req.body;
+    const { txnId, otp, verify } = req.body;
     const accessToken = req.headers['accesstoken'];
-    if (!accessToken || !txnId || !otp) {
+    if (!accessToken || !txnId || !otp || !verify) {
       return res.status(400).json({ 
         success: false, 
-        message: 'accesstoken, txnId and otp are required' 
+        message: 'accesstoken, txnId, otp and verify are required' 
       });
     }
     
-    const response = await mobilelogin.verifyLoginOtp({accessToken, txnId, otp });
+    const response = await mobilelogin.verifyLoginOtp({accessToken, txnId, otp, verify});
     
     // Return both the data and the X-token to the frontend
     res.status(200).json({ 

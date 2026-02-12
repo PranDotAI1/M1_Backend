@@ -19,21 +19,21 @@ function generateTimestamp() {
 }
 
 
-const requestLoginOtp = async (accessToken, loginId) => {
+const requestLoginOtp = async (accessToken, loginId, verify, otpsystem) => {
   try {
 
-    if (!accessToken || !loginId) {
-      throw new Error('Missing required parameters: accessToken and mobileNumber');
+    if (!accessToken || !loginId || !verify || !otpsystem) {
+      throw new Error('Missing required parameters: accessToken, loginId, verify and otpsystem');
     }
     const response = await axios.post(
       `${config.abdm.abhaBaseUrl}/api/v3/phr/web/login/abha/request/otp`,
       {
         scope: [
                 "abha-address-login",
-                "mobile-verify"],
+                verify],
         loginHint: "abha-address",
         loginId: loginId,
-        otpSystem: "abdm"
+        otpSystem: otpsystem
       },
       {
         headers: {
@@ -59,11 +59,11 @@ const requestLoginOtp = async (accessToken, loginId) => {
 
 
 
-const verifyLoginOtp = async ({ accessToken, txnId, otp }) => {
+const verifyLoginOtp = async ({ accessToken, txnId, otp, verify }) => {
   try {
     
-    if (!accessToken || !txnId || !otp) {
-      throw new Error('Missing required parameters: accessToken, txnId, otp');
+    if (!accessToken || !txnId || !otp || !verify) {
+      throw new Error('Missing required parameters: accessToken, txnId, otp and verify');
     }
     
     const response = await axios.post(
@@ -71,7 +71,7 @@ const verifyLoginOtp = async ({ accessToken, txnId, otp }) => {
      {
     scope: [
         "abha-address-login",
-        "mobile-verify"],
+        verify],
 
     authData: {
         authMethods: [

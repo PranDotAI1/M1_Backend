@@ -1,16 +1,16 @@
 import abhanumberLogin from '../models/login_via_abha_number.js';
 export const requestLoginOtp = async (req, res) => {
   try {
-    const { abhaNumber } = req.body;
+    const { abhaNumber, verify, otpsystem } = req.body;
     const access_token = req.headers['accesstoken'];
-    if (!abhaNumber || !access_token) {
+    if (!abhaNumber || !access_token || !verify || !otpsystem) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Abha number and accesstoken is required' 
+        message: 'Abha number, accesstoken, verify and otpsystem are required' 
       });
     }
     
-    const response = await abhanumberLogin.requestLoginOtp(access_token, abhaNumber);
+    const response = await abhanumberLogin.requestLoginOtp(access_token, abhaNumber, verify, otpsystem);
     
     res.status(200).json({ 
       success: true, 
@@ -32,16 +32,16 @@ export const requestLoginOtp = async (req, res) => {
 
 export const verifyLoginOtp = async (req, res) => {
   try {
-    const { txnId, otp } = req.body;
+    const { txnId, otp, verify } = req.body;
     const accessToken = req.headers['accesstoken'];
-    if (!accessToken || !txnId || !otp) {
+    if (!accessToken || !txnId || !otp || !verify) {
       return res.status(400).json({ 
         success: false, 
-        message: 'accesstoken, txnId and otp are required' 
+        message: 'accesstoken, txnId, otp and verify are required' 
       });
     }
     
-    const response = await abhanumberLogin.verifyLoginOtp({accessToken, txnId, otp });
+    const response = await abhanumberLogin.verifyLoginOtp({accessToken, txnId, otp, verify});
     
     // Save user details if login is successful
     if (response && response.data && response.data.accounts && response.data.accounts.length > 0) {
