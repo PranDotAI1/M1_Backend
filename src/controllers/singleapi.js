@@ -110,22 +110,57 @@ export const profileAddress = async (req, res) => {
     const response = await mobilelogin.profileAddress({accessToken, xToken });
     // Attempt to save profile into DB (best-effort)
     try {
+      // Compute age using year/month/day if available, otherwise parse dateOfBirth
+      const computeAge = (year, month, day, dateString) => {
+        const today = new Date();
+        if (year) {
+          const y = Number(year);
+          const m = month ? Number(month) - 1 : 0;
+          const d = day ? Number(day) : 1;
+          const birth = new Date(y, m, d);
+          if (isNaN(birth)) return null;
+          let age = today.getFullYear() - birth.getFullYear();
+          const mDiff = today.getMonth() - birth.getMonth();
+          if (mDiff < 0 || (mDiff === 0 && today.getDate() < birth.getDate())) age--;
+          return age >= 0 ? age : null;
+        }
+        if (dateString) {
+          const parsed = new Date(dateString);
+          if (!isNaN(parsed)) {
+            let age = today.getFullYear() - parsed.getFullYear();
+            const mDiff = today.getMonth() - parsed.getMonth();
+            if (mDiff < 0 || (mDiff === 0 && today.getDate() < parsed.getDate())) age--;
+            return age >= 0 ? age : null;
+          }
+        }
+        return null;
+      };
+
+      const age = computeAge(
+        response.data.yearOfBirth,
+        response.data.monthOfBirth,
+        response.data.dayOfBirth,
+        response.data.dateOfBirth
+      );
+
       const userDetailsForSaving = {
         firstName: response.data.firstName,
         middleName: response.data.middleName,
         lastName: response.data.lastName,
-        name: response.data.name || `${response.data.firstName || ''} ${response.data.middleName || ''} ${response.data.lastName || ''}`.trim(),
+        name: response.data.fullName,
         mobile: response.data.mobile,
         gender: response.data.gender,
         yearOfBirth: response.data.yearOfBirth,
         monthOfBirth: response.data.monthOfBirth,
         dayOfBirth: response.data.dayOfBirth,
-        dob: response.data.dob,
+        dob: response.data.dateOfBirth,
+        age: age,
         address: response.data.address,
-        ABHANumber: response.data.ABHANumber,
+        ABHANumber: response.data.abhaNumber,
         abhaaddress: response.data.phrAddress || response.data.preferredAbhaAddress || response.data.abhaAddress,
         status: response.data.status,
-        pincode: response.data.pincode,
+        pincode: response.data.pinCode,
+        
         // include raw response as fallback
         ...response.data
       };

@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String }, // Full name
   mobile: { type: String, required: true },
   dob: { type: String, required: true }, // Format: YYYY-MM-DD
+  age : { type: Number }, // Optional age field
   address: { type: String },
   ABHANumber: { type: String, required: true },
   abhaaddress: { type: String }, // ABHA address (PHR address)
