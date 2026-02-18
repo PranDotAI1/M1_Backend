@@ -2,6 +2,7 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
+  uhid: { type: String, required: true, unique: true }, // Unique Health ID
   f_name: { type: String, required: true },
   m_name: { type: String },
   l_name: { type: String },

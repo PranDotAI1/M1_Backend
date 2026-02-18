@@ -108,7 +108,37 @@ export const profileAddress = async (req, res) => {
     }
     
     const response = await mobilelogin.profileAddress({accessToken, xToken });
-    
+    // Attempt to save profile into DB (best-effort)
+    try {
+      const userDetailsForSaving = {
+        firstName: response.data.firstName,
+        middleName: response.data.middleName,
+        lastName: response.data.lastName,
+        name: response.data.name || `${response.data.firstName || ''} ${response.data.middleName || ''} ${response.data.lastName || ''}`.trim(),
+        mobile: response.data.mobile,
+        gender: response.data.gender,
+        yearOfBirth: response.data.yearOfBirth,
+        monthOfBirth: response.data.monthOfBirth,
+        dayOfBirth: response.data.dayOfBirth,
+        dob: response.data.dob,
+        address: response.data.address,
+        ABHANumber: response.data.ABHANumber,
+        abhaaddress: response.data.phrAddress || response.data.preferredAbhaAddress || response.data.abhaAddress,
+        status: response.data.status,
+        pincode: response.data.pincode,
+        // include raw response as fallback
+        ...response.data
+      };
+
+      const { saveUserDetails } = await import('../utils/userSaver.js');
+      await saveUserDetails(userDetailsForSaving);
+      console.log('✅ User profile saved successfully for ABHA:', userDetailsForSaving.ABHANumber);
+    } catch (saveError) {
+      console.error('❌ Error saving user profile from profileAddress:', saveError.message || saveError);
+      const { logError } = await import('../utils/errorLogger.js');
+      await logError('singleapi/profileAddress/saveUser', saveError.message || String(saveError), response.data);
+    }
+
     // Return both the data and the X-token to the frontend
     res.status(200).json({ 
       success: true, 
