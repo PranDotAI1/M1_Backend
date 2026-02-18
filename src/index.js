@@ -18,19 +18,12 @@ mongoose.connect('mongodb://admin:Pran.ai%4022@13.201.185.3:27017/Patient_DB?aut
     // List all collections
     try {
       const collections = await mongoose.connection.db.listCollections().toArray();
-      console.log('📚 Available collections:', collections.map(c => c.name));
       
       // Check if Patients collection exists
       const hasPatientsCollection = collections.some(c => c.name === 'Patients');
-      if (!hasPatientsCollection) {
-        console.log('⚠️ Patients collection not found, will be created on first insert');
-      } else {
-        console.log('✅ Patients collection exists');
-        
         // Count patients
         const patientCount = await UserModel.countDocuments();
-        console.log(`📊 Total patients: ${patientCount}`);
-      }
+      
     } catch (error) {
       console.error('❌ Error checking collections:', error);
     }
