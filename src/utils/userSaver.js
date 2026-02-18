@@ -66,9 +66,16 @@ export async function saveUserDetails(details) {
 
       if (isSameData) {
         // Same data - update with new details using existing UHID
-        userDetails.uhid = existingUser.uhid;
+        // If existing user doesn't have a UHID, generate one now
+        if (!existingUser.uhid) {
+          const newUHID = await generateUniqueUHID();
+          userDetails.uhid = newUHID;
+          console.warn('⚠️ Existing user had undefined UHID, generated new one:', newUHID);
+        } else {
+          userDetails.uhid = existingUser.uhid;
+        }
         await User.findByIdAndUpdate(existingUser._id, userDetails, { runValidators: true });
-        console.log('✅ User updated with existing UHID:', existingUser.uhid, '| ABHA:', userDetails.ABHANumber);
+        console.log('✅ User updated with existing UHID:', userDetails.uhid, '| ABHA:', userDetails.ABHANumber);
       } else {
         // Different data - generate new unique UHID and CREATE a NEW record
         // (Do NOT update the existing record; preserve historical patient entry)

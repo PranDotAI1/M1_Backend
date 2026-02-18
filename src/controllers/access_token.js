@@ -111,37 +111,6 @@ export const getProfileInfo = async (req, res) => {
     const response = await Aadhaarenroll.getProfileInfo(accessToken, xToken);
     
     try {
-      const computeAge = (year, month, day, dateString) => {
-        const today = new Date();
-        if (year) {
-          const y = Number(year);
-          const m = month ? Number(month) - 1 : 0;
-          const d = day ? Number(day) : 1;
-          const birth = new Date(y, m, d);
-          if (isNaN(birth)) return null;
-          let age = today.getFullYear() - birth.getFullYear();
-          const mDiff = today.getMonth() - birth.getMonth();
-          if (mDiff < 0 || (mDiff === 0 && today.getDate() < birth.getDate())) age--;
-          return age >= 0 ? age : null;
-        }
-        if (dateString) {
-          const parsed = new Date(dateString);
-          if (!isNaN(parsed)) {
-            let age = today.getFullYear() - parsed.getFullYear();
-            const mDiff = today.getMonth() - parsed.getMonth();
-            if (mDiff < 0 || (mDiff === 0 && today.getDate() < parsed.getDate())) age--;
-            return age >= 0 ? age : null;
-          }
-        }
-        return null;
-      };
-
-      const age = computeAge(
-        response.data.yearOfBirth,
-        response.data.monthOfBirth,
-        response.data.dayOfBirth,
-        response.data.dateOfBirth
-      );
       // Map the profile response to include all the fields you want
       const userDetailsForSaving = {
         firstName: response.firstName,
@@ -153,7 +122,6 @@ export const getProfileInfo = async (req, res) => {
         yearOfBirth: response.yearOfBirth,
         monthOfBirth: response.monthOfBirth,
         dayOfBirth: response.dayOfBirth,
-        age: age,
         address: response.address,
         ABHANumber: response.ABHANumber,
         abhaaddress: response.phrAddress || response.preferredAbhaAddress || response.abhaAddress,
