@@ -110,36 +110,6 @@ export const getProfileInfo = async (req, res) => {
     }
     const response = await Aadhaarenroll.getProfileInfo(accessToken, xToken);
     
-    try {
-      // Map the profile response to include all the fields you want
-      const userDetailsForSaving = {
-        firstName: response.firstName,
-        middleName: response.middleName,
-        lastName: response.lastName,
-        name: response.name || `${response.firstName || ''} ${response.middleName || ''} ${response.lastName || ''}`.trim(),
-        mobile: response.mobile,
-        gender: response.gender,
-        yearOfBirth: response.yearOfBirth,
-        monthOfBirth: response.monthOfBirth,
-        dayOfBirth: response.dayOfBirth,
-        address: response.address,
-        ABHANumber: response.ABHANumber,
-        abhaaddress: response.phrAddress || response.preferredAbhaAddress || response.abhaAddress,
-        status: response.status,
-        pincode: response.pincode,
-        // Include original response data as fallback
-        ...response
-      };
-      
-      const { saveUserDetails } = await import('../utils/userSaver.js');
-      await saveUserDetails(userDetailsForSaving);
-      console.log('✅ User profile saved successfully for ABHA:', userDetailsForSaving.ABHANumber);
-    } catch (saveError) {
-      console.error('❌ Error saving user profile:', saveError.message);
-      const { logError } = await import('../utils/errorLogger.js');
-      await logError('access_token/getProfileInfo/saveUser', saveError.message, response);
-    }
-    
     res.status(200).json({ 
       success: true, 
       data: response 

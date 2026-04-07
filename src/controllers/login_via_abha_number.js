@@ -43,32 +43,6 @@ export const verifyLoginOtp = async (req, res) => {
     
     const response = await abhanumberLogin.verifyLoginOtp({accessToken, txnId, otp, verify});
     
-    // Save user details if login is successful
-    if (response && response.data && response.data.accounts && response.data.accounts.length > 0) {
-      const acc = response.data.accounts[0];
-      const userDetails = {
-        mobile: response.data.mobile || acc.mobile,
-        ABHANumber: acc.ABHANumber || acc.abhaNumber,
-        name: acc.name,
-        f_name: acc.firstName || acc.name?.split(' ')[0] || '',
-        m_name: acc.middleName || acc.name?.split(' ')[1] || '',
-        l_name: acc.lastName || acc.name?.split(' ').slice(-1)[0] || '',
-        abhaaddress: acc.preferredAbhaAddress || acc.phrAddress,
-        gender: acc.gender || acc.gander,
-        status: acc.status,
-        dob: acc.dateOfBirth || acc.dob,
-        address: acc.address,
-        pincode: acc.pincode
-      };
-      
-      try {
-        const { saveUserDetails } = await import('../utils/userSaver.js');
-        await saveUserDetails(userDetails);
-        console.log('✅ User details saved successfully for ABHA:', userDetails.ABHANumber);
-      } catch (saveError) {
-        console.error('❌ Error saving user details:', saveError.message);
-      }
-    }
     // Return both the data and the X-token to the frontend
     res.status(200).json({ 
       success: true, 
