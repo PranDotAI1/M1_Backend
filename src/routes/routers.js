@@ -15,6 +15,7 @@ import * as retrievalController from '../controllers/retrieval.js';
 import * as emailController from '../controllers/email_verify.js';
 import * as singleapiController from '../controllers/singleapi.js';
 import * as captchaController from '../controllers/captcha.js';
+import * as findabhaController from '../controllers/findabha.js';
 
 const router = express.Router();
 
@@ -72,5 +73,9 @@ router.post('/profile/login/fetch-abha', singleapiController.fetchAbha);
 router.get('/profile/address', singleapiController.profileAddress);
 router.get('/profile/cardbyaddress', singleapiController.CardbyAddress);
 router.post('/profile/search', singleapiController.searchprofile);
+router.post('/profile/index/find', findabhaController.searchAbha);
+router.post('/profile/index/send-otp', findabhaController.requestindexOtp);
+router.post('/profile/index/verify-otp', findabhaController.verifyindexOtp);
+
 
 export default router;

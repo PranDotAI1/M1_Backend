@@ -1,0 +1,1216 @@
+{
+  "info": {
+    "name": "ABDM Backend API",
+    "_postman_id": "abdm-backend-collection",
+    "description": "Complete Postman collection for ABDM Backend API running on port 4200",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4200/api/abha",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "xToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "txnId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Get Access Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/token",
+              "host": ["{{base_url}}"],
+              "path": ["token"]
+            },
+            "description": "Fetches the ABDM access token. No body or headers required."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Captcha",
+      "item": [
+        {
+          "name": "Generate Captcha",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/captcha/generate",
+              "host": ["{{base_url}}"],
+              "path": ["captcha", "generate"]
+            },
+            "description": "Returns a base64 SVG captcha image and a sessionId."
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Captcha",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"<sessionId from generate>\",\n  \"captcha\": \"<user entered captcha text>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/captcha/validate",
+              "host": ["{{base_url}}"],
+              "path": ["captcha", "validate"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Enrollment via Aadhaar",
+      "item": [
+        {
+          "name": "Send Aadhaar OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<12-digit Aadhaar number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/enrollment/aadhar/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["enrollment", "aadhar", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Aadhaar OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otpValue\": \"<6-digit OTP>\",\n  \"mobile\": \"<10-digit mobile number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/enrollment/aadhar/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["enrollment", "aadhar", "verify-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get ABHA Address Suggestions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "transaction-id", "value": "{{txnId}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/enrollment/abha-address-suggestions",
+              "host": ["{{base_url}}"],
+              "path": ["enrollment", "abha-address-suggestions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create ABHA Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"abhaAddress\": \"<desired ABHA address>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/enrollment/create-abha-address",
+              "host": ["{{base_url}}"],
+              "path": ["enrollment", "create-abha-address"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Enrollment via DL (Driving Licence)",
+      "item": [
+        {
+          "name": "Send DL OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<Driving Licence number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/dl/enroll/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["dl", "enroll", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify DL OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otpValue\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/dl/enroll/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["dl", "enroll", "verify-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Enroll Number (DL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"DL_number\": \"<DL number>\",\n  \"First_Name\": \"John\",\n  \"Middle_Name\": \"\",\n  \"Last_Name\": \"Doe\",\n  \"d_o_b\": \"1990-01-01\",\n  \"gender\": \"M\",\n  \"base_front_photo\": \"<base64 front image>\",\n  \"base_back_photo\": \"<base64 back image>\",\n  \"Address\": \"123 Main Street\",\n  \"state\": \"Maharashtra\",\n  \"District\": \"Pune\",\n  \"Pincode\": \"411001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/dl/enroll/create-enroll-number",
+              "host": ["{{base_url}}"],
+              "path": ["dl", "enroll", "create-enroll-number"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Login via Mobile",
+      "item": [
+        {
+          "name": "Send Mobile Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobileNumber\": \"<10-digit mobile number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login/mobile/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["login", "mobile", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Mobile Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login/mobile/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["login", "mobile", "verify-otp"]
+            },
+            "description": "Returns data and xToken on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify User (Account Verify)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "t-token", "value": "<T-token from verify-otp>" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"abhanumber\": \"<14-digit ABHA number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/verify",
+              "host": ["{{base_url}}"],
+              "path": ["account", "verify"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Login via Aadhaar",
+      "item": [
+        {
+          "name": "Send Aadhaar Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aadharNumber\": \"<12-digit Aadhaar number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login/aadhar/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["login", "aadhar", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Aadhaar Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login/aadhar/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["login", "aadhar", "verify-otp"]
+            },
+            "description": "Returns data and xToken on success."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 - Login via ABHA Address",
+      "item": [
+        {
+          "name": "Send ABHA Address Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"abhaNumber\": \"<ABHA address e.g. user@abdm>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login/abha/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["login", "abha", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify ABHA Address Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login/abha/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["login", "abha", "verify-otp"]
+            },
+            "description": "Returns data and xToken on success."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 - Login via ABHA Number",
+      "item": [
+        {
+          "name": "Send ABHA Number Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"abhaNumber\": \"<14-digit ABHA number>\",\n  \"verify\": \"MOBILE_OTP\",\n  \"otpsystem\": \"abdm\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login/abha/number/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["login", "abha", "number", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify ABHA Number Login OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\",\n  \"verify\": \"MOBILE_OTP\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login/abha/number/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["login", "abha", "number", "verify-otp"]
+            },
+            "description": "Returns data and xToken on success."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 - Single Login API",
+      "item": [
+        {
+          "name": "Single Login - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<mobile / ABHA number / ABHA address>\",\n  \"verify\": \"MOBILE_OTP\",\n  \"otpsystem\": \"abdm\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/singlelogin/api",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "singlelogin", "api"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Single Login - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\",\n  \"verify\": \"MOBILE_OTP\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/singlelogin/api/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "singlelogin", "api", "verify-otp"]
+            },
+            "description": "Returns data and xToken on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Verify Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<ABHA address or number>\",\n  \"password\": \"<password>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/login/verify-password",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "login", "verify-password"]
+            },
+            "description": "Returns data and xToken on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Fetch ABHA",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<ABHA address or number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/login/fetch-abha",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "login", "fetch-abha"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10 - Profile",
+      "item": [
+        {
+          "name": "Get Profile Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile",
+              "host": ["{{base_url}}"],
+              "path": ["profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get QR Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/qrcode",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "qrcode"]
+            },
+            "description": "Returns ABHA QR code PNG image."
+          },
+          "response": []
+        },
+        {
+          "name": "Get ABHA Card",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/abha-card",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "abha-card"]
+            },
+            "description": "Returns ABHA card (PDF/PNG)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile Photo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"photo\": \"<base64 encoded image>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/photo",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "photo"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Email Verification Link",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<email address>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/email-verification-link",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "email-verification-link"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile Address",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/address",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "address"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Card by Address",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/cardbyaddress",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "cardbyaddress"]
+            },
+            "description": "Downloads PHR card by ABHA address."
+          },
+          "response": []
+        },
+        {
+          "name": "Search Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"<ABHA address e.g. user@abdm>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/search",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/profile/logout",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 - Find ABHA (Index)",
+      "item": [
+        {
+          "name": "Search ABHA",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<mobile number or ABHA number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/index/find",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "index", "find"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Index OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"loginId\": \"<mobile number or ABHA number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/index/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "index", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Index OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profile/index/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["profile", "index", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12 - Retrieval",
+      "item": [
+        {
+          "name": "Send Retrieval OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<mobile number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/retrieval/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["retrieval", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Retrieval OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/retrieval/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["retrieval", "verify-otp"]
+            },
+            "description": "Returns data and xToken on success."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13 - Update Email",
+      "item": [
+        {
+          "name": "Update Email - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<new email address>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/update/email/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["update", "email", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Email - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/update/email/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["update", "email", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "14 - Update Mobile",
+      "item": [
+        {
+          "name": "Update Mobile - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<new 10-digit mobile number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/update/mobile/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["update", "mobile", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Mobile - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/update/mobile/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["update", "mobile", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "15 - Account - Re-KYC",
+      "item": [
+        {
+          "name": "Re-KYC - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<12-digit Aadhaar number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/re-kyc/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "re-kyc", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Re-KYC - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/re-kyc/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "re-kyc", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "16 - Account - Deactivate",
+      "item": [
+        {
+          "name": "Deactivate - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<ABHA number or address>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/de-activate/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "de-activate", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/de-activate/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "de-activate", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "17 - Account - Delete",
+      "item": [
+        {
+          "name": "Delete - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<ABHA number or address>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/delete/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "delete", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/delete/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "delete", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "18 - Account - Reactivate",
+      "item": [
+        {
+          "name": "Reactivate - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<ABHA number or address>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/re-activate/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "re-activate", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reactivate - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/re-activate/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "re-activate", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "19 - Account - Change Password",
+      "item": [
+        {
+          "name": "Change Password - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<ABHA address or number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/change-password/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "change-password", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" },
+              { "key": "xtoken", "value": "{{xToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/account/change-password/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["account", "change-password", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "20 - Forgot ABHA",
+      "item": [
+        {
+          "name": "Forgot - Mobile Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<10-digit mobile number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forgot/mobile/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["forgot", "mobile", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot - Mobile Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forgot/mobile/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["forgot", "mobile", "verify-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot - Aadhaar Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginId\": \"<12-digit Aadhaar number>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forgot/aadhar/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["forgot", "aadhar", "send-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot - Aadhaar Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "accesstoken", "value": "{{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"txnId\": \"{{txnId}}\",\n  \"otp\": \"<6-digit OTP>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forgot/aadhar/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["forgot", "aadhar", "verify-otp"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
