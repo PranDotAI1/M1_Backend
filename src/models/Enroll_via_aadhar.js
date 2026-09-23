@@ -51,7 +51,21 @@ const sendAadhaarOtp = async (accessToken, loginId) => {
     return response.data;
   } catch (error) {
     console.error('Error sending OTP:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'Failed to send OTP');
+
+//     Error sending OTP: { loginId: 'Invalid LoginId', timestamp: '2026-09-23 16:13:15' }
+// { loginId: 'Invalid LoginId', timestamp: '2026-09-23 16:13:15' }
+  
+    let message = ""
+
+    if ( error.response?.data && error.response?.data?.loginId){
+      message = 'Aadhar number is not valid';
+    }
+    else if (error.response?.data === 'Please make a valid request.') {
+      message = "Aadhar number is not valid"
+    } else {
+      message = error.response?.data?.message || error.response?.data || error.message ||  "Failed to send OTP"
+    }
+    throw new Error(message);
   }
 };
 
