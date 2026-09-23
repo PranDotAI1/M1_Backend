@@ -115,7 +115,12 @@ const verifyAadhaarOtp = async ({ accessToken, txnId, otpValue, mobile }) => {
       }
     );
 
-    return response.data;
+    const xToken = response.data?.token || response.data?.tokens?.token;
+
+    return {
+      ...(typeof response.data === 'object' ? response.data : { data: response.data }),
+      xToken,
+    };
   } catch (error) {
     console.error('Error verifying OTP:', error.response?.data || error.message);
     throw {
@@ -509,7 +514,12 @@ const createAbhaAddress = async (accessToken, txnId, abhaAddress) => {
       }
     );
 
-    return response.data;
+    const xToken = response.data?.token || response.data?.tokens?.token;
+
+    return {
+      ...(typeof response.data === 'object' ? response.data : { data: response.data }),
+      xToken,
+    };
   } catch (error) {
     console.error('Error creating ABHA address:', error.response?.data || error.message);
     throw {

@@ -93,10 +93,17 @@ const verifyLoginOtp = async ({ accessToken, txnId, otp, verify }) => {
       }
     );
     
-    // Return the response data along with the X-token from headers
+    // Return the response data along with the X-token from headers or body
+    const xToken =
+      response.headers?.['x-token'] ||
+      response.headers?.['xtoken'] ||
+      response.headers?.['X-token'] ||
+      response.data?.token ||
+      response.data?.tokens?.token;
+
     return {
       data: response.data,
-      xToken: response.headers['x-token'] // This will be passed to frontend
+      xToken,
     };
   } catch (error) {
     console.error('Error verifying login OTP:', error.response?.data || error.message);
@@ -337,10 +344,17 @@ const verifypass = async ({ accessToken, loginId, password }) => {
       }
     );
     
-    // Return the response data along with the X-token from headers
+    // Return the response data along with the X-token from headers or body
+    const xToken =
+      response.headers?.['x-token'] ||
+      response.headers?.['xtoken'] ||
+      response.headers?.['X-token'] ||
+      response.data?.token ||
+      response.data?.tokens?.token;
+
     return {
       data: response.data,
-      xToken: response.headers['x-token'] // This will be passed to frontend
+      xToken,
     };
   } catch (error) {
     console.error('Error verifying login OTP:', error.response?.data || error.message);

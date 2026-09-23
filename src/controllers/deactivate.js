@@ -1,13 +1,16 @@
 import deactivate from '../models/deactivate.js';
+import abhaService from '../services/abhaService.js';
+import { getXToken } from '../utils/cookieHelper.js';
+
 export const requestLoginOtp = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const access_token = req.headers['accesstoken'];
-    const X_token = req.headers['xtoken'];
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    const X_token = getXToken(req);
     if (!loginId || !X_token || !access_token) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Abha number, X_token and accesstoken is required' 
+        message: 'Abha number, X_token and accesstoken are required' 
       });
     }
     
@@ -34,12 +37,12 @@ export const requestLoginOtp = async (req, res) => {
 export const verifyLoginOtp = async (req, res) => {
   try {
     const { txnId, otp } = req.body;
-    const accessToken = req.headers['accesstoken'];
-    const X_token = req.headers['xtoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    const X_token = getXToken(req);
     if (!accessToken || !X_token || !txnId || !otp) {
       return res.status(400).json({ 
         success: false, 
-        message: 'accesstoken,X_token , txnId and otp are required' 
+        message: 'accesstoken, X_token, txnId and otp are required' 
       });
     }
     

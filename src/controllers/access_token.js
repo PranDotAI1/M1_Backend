@@ -2,6 +2,7 @@ import abhaService from '../services/abhaService.js';
 import path from 'path';
 import fs from 'fs';
 import Aadhaarenroll from '../models/Enroll_via_aadhar.js';
+import { getXToken, clearXTokenCookie, setXTokenCookie, extractToken } from '../utils/cookieHelper.js';
 
 /**
  * Get access token for ABDM APIs
@@ -21,8 +22,10 @@ export const getAccessToken = async (req, res) => {
 export const sendAadhaarOtp = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const access_token = req.headers['accesstoken'];
-    
+    const access_token =
+      req.headers['accesstoken'] ??
+      (await abhaService.getAccessTokenInternal());
+
     if (!access_token || !loginId) {
       return res.status(400).json({ success: false, message: 'accesstoken, loginId is required' });
     }
@@ -41,7 +44,7 @@ export const sendAadhaarOtp = async (req, res) => {
 export const verifyAadhaarOtp = async (req, res) => {
   try {
     const { txnId, otpValue, mobile } = req.body;
-    const accessToken = req.headers['accesstoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!accessToken || !txnId || !otpValue || !mobile) {
       return res.status(400).json({ 
         success: false, 
@@ -50,10 +53,15 @@ export const verifyAadhaarOtp = async (req, res) => {
     }
     
     const response = await Aadhaarenroll.verifyAadhaarOtp({accessToken, txnId, otpValue, mobile });
-    
+    const token = extractToken(response);
+    if (token) {
+      setXTokenCookie(res, token);
+    }
+
     res.status(200).json({ 
       success: true, 
-      data: response 
+      data: response.data || response,
+      xToken: token,
     });
   } catch (error) {
     console.error('Error in verifyAadhaarOtp controller:', error);
@@ -70,9 +78,11 @@ export const verifyAadhaarOtp = async (req, res) => {
 
 export const getphoto = async (req, res) => {
   try {
-    const { photo} = req.body;
-    const accessToken = req.headers['accesstoken'];
-    const xToken = req.headers['xtoken'];
+    const { photo } = req.body;
+    const accessToken =
+      req.headers['accesstoken'] ??
+      (await abhaService.getAccessTokenInternal());
+    const xToken = getXToken(req);
     if (!accessToken || !xToken || !photo){
       return res.status(400).json({ 
         success: false, 
@@ -99,13 +109,14 @@ export const getphoto = async (req, res) => {
 
 export const getProfileInfo = async (req, res) => {
   try {
-    const xToken = req.headers['xtoken'];
-    const accessToken = req.headers['accesstoken'];
-    
+    const xToken = getXToken(req);
+    const accessToken =
+      req.headers['accesstoken'] ??
+      (await abhaService.getAccessTokenInternal());
     if (!accessToken || !xToken) {
       return res.status(400).json({ 
         success: false, 
-        message: 'X-token and accessToken is required in request headers' 
+        message: 'X-token and accessToken are required' 
       });
     }
     const response = await Aadhaarenroll.getProfileInfo(accessToken, xToken);
@@ -127,13 +138,15 @@ export const getProfileInfo = async (req, res) => {
 
 export const getQrCode = async (req, res) => {
   try {
-    const xToken = req.headers['xtoken'];
-    const accessToken = req.headers['accesstoken'];
-    
+    const xToken = getXToken(req);
+    const accessToken =
+      req.headers['accesstoken'] ??
+      (await abhaService.getAccessTokenInternal());
+
     if (!accessToken || !xToken) {
       return res.status(400).json({ 
         success: false, 
-        message: 'X-token and accessToken is required in request headers' 
+        message: 'X-token and accessToken are required' 
       });
     }
     
@@ -180,13 +193,13 @@ export const getQrCode = async (req, res) => {
 
 export const getAbhaCard = async (req, res) => {
   try {
-    const xToken = req.headers['xtoken'];
-    const accessToken = req.headers['accesstoken'];
-    
+    const xToken = getXToken(req);
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+
     if (!accessToken || !xToken) {
       return res.status(400).json({ 
         success: false, 
-        message: 'X-token and accessToken is required in request headers' 
+        message: 'X-token and accessToken are required' 
       });
     }
     
@@ -264,13 +277,16 @@ export const getAbhaCard = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    const xToken = req.headers['xtoken'];
-    const accessToken = req.headers['accesstoken'];
-    
+    const xToken = getXToken(req);
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+
+    // Clear session cookies regardless
+    clearXTokenCookie(res);
+
     if (!accessToken || !xToken) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'X-token and accessToken is required in request headers' 
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Logged out successfully' 
       });
     }
     const response = await Aadhaarenroll.logout(accessToken, xToken);
@@ -293,9 +309,9 @@ export const logout = async (req, res) => {
 export const sendEmailVerificationLink = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const xToken = req.headers['xtoken'];
-    const accessToken = req.headers['accesstoken'];
-    
+    const xToken = getXToken(req);
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+
     if (!accessToken || !xToken || !loginId) {
       return res.status(400).json({ 
         success: false, 
@@ -323,8 +339,8 @@ export const sendEmailVerificationLink = async (req, res) => {
 export const getAbhaAddressSuggestions = async (req, res) => {
   try {
     const transactionId = req.headers['transaction-id'];
-    const accessToken = req.headers['accesstoken'];
-    
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+
     if (!accessToken || !transactionId) {
       return res.status(400).json({ 
         success: false, 
@@ -352,8 +368,8 @@ export const getAbhaAddressSuggestions = async (req, res) => {
 export const createAbhaAddress = async (req, res) => {
   try {
     const { txnId, abhaAddress } = req.body;
-    const accessToken = req.headers['accesstoken'];
-    
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+
     if (!accessToken || !txnId || !abhaAddress) {
       return res.status(400).json({ 
         success: false, 
@@ -362,10 +378,15 @@ export const createAbhaAddress = async (req, res) => {
     }
     
     const response = await Aadhaarenroll.createAbhaAddress(accessToken, txnId, abhaAddress);
-    
+    const token = extractToken(response);
+    if (token) {
+      setXTokenCookie(res, token);
+    }
+
     res.status(200).json({ 
       success: true, 
-      data: response 
+      data: response.data || response,
+      xToken: token,
     });
   } catch (error) {
     console.error('Error in createAbhaAddress:', error);

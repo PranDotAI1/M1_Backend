@@ -1,13 +1,15 @@
 import verifyemail from '../models/email_verify.js';
+import abhaService from '../services/abhaService.js';
+import { getXToken } from '../utils/cookieHelper.js';
 export const requestOtp = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const access_token = req.headers['accesstoken'];
-    const X_token = req.headers['xtoken'];
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    const X_token = getXToken(req);
     if (!loginId || !X_token || !access_token) {
       return res.status(400).json({ 
         success: false, 
-        message: 'email, X_token and accesstoken is required' 
+        message: 'email, X_token and accesstoken are required' 
       });
     }
     
@@ -34,12 +36,12 @@ export const requestOtp = async (req, res) => {
 export const verifyOtp = async (req, res) => {
   try {
     const { txnId, otp } = req.body;
-    const accessToken = req.headers['accesstoken'];
-    const X_token = req.headers['xtoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    const X_token = getXToken(req);
     if (!accessToken || !X_token || !txnId || !otp) {
       return res.status(400).json({ 
         success: false, 
-        message: 'accesstoken,X_token , txnId and otp are required' 
+        message: 'accesstoken, X_token, txnId and otp are required' 
       });
     }
     
@@ -75,12 +77,12 @@ export const verifyOtp = async (req, res) => {
 export const requestMobileOtp = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const access_token = req.headers['accesstoken'];
-    const X_token = req.headers['xtoken'];
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    const X_token = getXToken(req);
     if (!loginId || !X_token || !access_token) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Mobile Number, X_token and accesstoken is required' 
+        message: 'Mobile Number, X_token and accesstoken are required' 
       });
     }
     
@@ -107,12 +109,12 @@ export const requestMobileOtp = async (req, res) => {
 export const verifyMobileOtp = async (req, res) => {
   try {
     const { txnId, otp } = req.body;
-    const accessToken = req.headers['accesstoken'];
-    const X_token = req.headers['xtoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    const X_token = getXToken(req);
     if (!accessToken || !X_token || !txnId || !otp) {
       return res.status(400).json({ 
         success: false, 
-        message: 'accesstoken,X_token , txnId and otp are required' 
+        message: 'accesstoken, X_token, txnId and otp are required' 
       });
     }
     

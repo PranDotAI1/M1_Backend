@@ -4,6 +4,8 @@ import { logError } from './utils/errorLogger.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 import abhaRoutes from './routes/routers.js';
 import UserModel from './models/user.js';
 
@@ -49,7 +51,12 @@ const app = express();
 const PORT = process.env.PORT || 4200;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+app.use(morgan('dev'));
+app.use(cookieParser());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

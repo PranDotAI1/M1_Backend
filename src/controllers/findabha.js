@@ -1,9 +1,12 @@
 import findabha from '../models/findabha.js';
+import abhaService from '../services/abhaService.js';
+import { setXTokenCookie, extractToken } from '../utils/cookieHelper.js';
+
 
 export const searchAbha = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const access_token = req.headers['accesstoken'];
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!loginId || !access_token) {
       return res.status(400).json({ 
         success: false, 
@@ -28,11 +31,10 @@ export const searchAbha = async (req, res) => {
   }
 };
 
-
 export const requestindexOtp = async (req, res) => {
   try {
     const { txnId, loginId } = req.body;
-    const accessToken = req.headers['accesstoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!loginId || !accessToken || !txnId) {
       return res.status(400).json({ 
         success: false, 
@@ -57,13 +59,12 @@ export const requestindexOtp = async (req, res) => {
   }
 };
 
-
 // Verify OTP for ABHA login
 
 export const verifyindexOtp = async (req, res) => {
   try {
     const { txnId, otp } = req.body;
-    const accessToken = req.headers['accesstoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!accessToken || !txnId || !otp) {
       return res.status(400).json({ 
         success: false, 
@@ -72,11 +73,15 @@ export const verifyindexOtp = async (req, res) => {
     }
     
     const response = await findabha.verifyindexOtp({accessToken, txnId, otp });
+    const token = extractToken(response);
+    if (token) {
+      setXTokenCookie(res, token);
+    }
     
-    // Return both the data and the X-token to the frontend
     res.status(200).json({ 
       success: true, 
-      data: response.data,
+      data: response.data || response,
+      xToken: token,
     });
   } catch (error) {
     console.error('Error in verifyLoginOtp controller:', error);

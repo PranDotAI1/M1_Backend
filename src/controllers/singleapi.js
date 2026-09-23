@@ -1,11 +1,14 @@
 import mobilelogin from '../models/singleapi.js';
 import path from 'path';
 import fs from 'fs';
+import abhaService from '../services/abhaService.js';
+import { setXTokenCookie, getXToken, extractToken } from '../utils/cookieHelper.js';
+
 
 export const requestLoginOtp = async (req, res) => {
   try {
     const { loginId, verify, otpsystem } = req.body;
-    const access_token = req.headers['accesstoken'];
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!loginId || !access_token || !verify || !otpsystem) {
       return res.status(400).json({ 
         success: false, 
@@ -36,7 +39,7 @@ export const requestLoginOtp = async (req, res) => {
 export const verifyLoginOtp = async (req, res) => {
   try {
     const { txnId, otp, verify } = req.body;
-    const accessToken = req.headers['accesstoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!accessToken || !txnId || !otp || !verify) {
       return res.status(400).json({ 
         success: false, 
@@ -45,12 +48,15 @@ export const verifyLoginOtp = async (req, res) => {
     }
     
     const response = await mobilelogin.verifyLoginOtp({accessToken, txnId, otp, verify});
+    const token = extractToken(response);
+    if (token) {
+      setXTokenCookie(res, token);
+    }
     
-    // Return both the data and the X-token to the frontend
     res.status(200).json({ 
       success: true, 
-      data: response.data,
-      xToken: response.xToken // Frontend will store this
+      data: response.data || response,
+      xToken: token,
     });
   } catch (error) {
     console.error('Error in verifyLoginOtp controller:', error);
@@ -68,7 +74,7 @@ export const verifyLoginOtp = async (req, res) => {
 export const searchprofile = async (req, res) => {
   try {
     const { address } = req.body;
-    const access_token = req.headers['accesstoken'];
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!address || !access_token) {
       return res.status(400).json({ 
         success: false, 
@@ -98,8 +104,8 @@ export const searchprofile = async (req, res) => {
 
 export const profileAddress = async (req, res) => {
   try {
-    const accessToken = req.headers['accesstoken'];
-    const xToken = req.headers['xtoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    const xToken = getXToken(req);
     if (!accessToken || !xToken) {
       return res.status(400).json({ 
         success: false, 
@@ -128,13 +134,13 @@ export const profileAddress = async (req, res) => {
 
 export const CardbyAddress = async (req, res) => {
   try {
-    const accessToken = req.headers['accesstoken'];
-    const xToken = req.headers['xtoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    const xToken = getXToken(req);
     
     if (!accessToken || !xToken) {
       return res.status(400).json({ 
         success: false, 
-        message: 'accesstoken and xtoken are required in request headers' 
+        message: 'accesstoken and xtoken are required' 
       });
     }
     
@@ -213,7 +219,7 @@ export const CardbyAddress = async (req, res) => {
 export const fetchAbha = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const access_token = req.headers['accesstoken'];
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!loginId || !access_token) {
       return res.status(400).json({ 
         success: false, 
@@ -245,8 +251,7 @@ export const verifypass = async (req, res) => {
   try {
     console.log('Access Token:', req.headers, req.body);
     const { loginId, password } = req.body;
-    const accessToken = req.headers['accesstoken'];
-    console.log('Access Token:', req.headers, req.body);
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!accessToken || !loginId || !password) {
       return res.status(400).json({ 
         success: false, 
@@ -255,12 +260,15 @@ export const verifypass = async (req, res) => {
     }
     
     const response = await mobilelogin.verifypass({accessToken, loginId, password });
+    const token = extractToken(response);
+    if (token) {
+      setXTokenCookie(res, token);
+    }
     
-    // Return both the data and the X-token to the frontend
     res.status(200).json({ 
       success: true, 
-      data: response.data,
-      xToken: response.xToken // Frontend will store this
+      data: response.data || response,
+      xToken: token,
     });
   } catch (error) {
     console.error('Error in verify password controller:', error);

@@ -81,10 +81,17 @@ const verifyDlOtp = async ({ accessToken, txnId, otpValue }) => {
             }
         );
 
-        // Return the response data along with the X-token from headers
+        // Return the response data along with the X-token from headers or body
+        const xToken =
+            response.headers?.['x-token'] ||
+            response.headers?.['xtoken'] ||
+            response.headers?.['X-token'] ||
+            response.data?.token ||
+            response.data?.tokens?.token;
+
         return {
             data: response.data,
-            xToken: response.headers['x-token'] // This will be passed to frontend
+            xToken,
         };
     } catch (error) {
         console.error('Error verifying OTP:', error.response?.data || error.message);
@@ -134,9 +141,17 @@ const createENumber = async ({ accessToken, txnId,  DL_number, First_Name, Middl
             }
         );
 
-        // Return the response data along with the X-token from headers
+        // Return the response data along with the X-token from headers or body
+        const xToken =
+            response.headers?.['x-token'] ||
+            response.headers?.['xtoken'] ||
+            response.headers?.['X-token'] ||
+            response.data?.token ||
+            response.data?.tokens?.token;
+
         return {
             data: response.data,
+            xToken,
         };
     } catch (error) {
         console.error('Error verifying OTP:', error.response?.data || error.message);

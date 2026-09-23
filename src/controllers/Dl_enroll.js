@@ -1,11 +1,12 @@
 import DLenroll from '../models/Dl_enroll.js';
-
+import abhaService from '../services/abhaService.js';
+import { setXTokenCookie, extractToken } from '../utils/cookieHelper.js';
 
 export const sendDlOtp = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const access_token = req.headers['accesstoken'];
-    
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+
     if (!access_token || !loginId) {
       return res.status(400).json({ success: false, message: 'accesstoken, loginId is required' });
     }
@@ -28,18 +29,23 @@ export const verifyDlOtp = async (req, res) => {
   try {
     const { txnId, otpValue } = req.body;
     console.log(req.headers, req.body);
-    const accessToken = req.headers['accesstoken'];
-    if (!accessToken || !txnId || !otpValue ) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'accesstoken, txnId and otpValue are required' 
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
+    if (!accessToken || !txnId || !otpValue) {
+      return res.status(400).json({
+        success: false,
+        message: 'accesstoken, txnId and otpValue are required',
       });
     }
     
     const response = await DLenroll.verifyDlOtp({accessToken, txnId, otpValue });
+    const token = extractToken(response);
+    if (token) {
+      setXTokenCookie(res, token);
+    }
     res.status(200).json({ 
       success: true, 
-      data: response 
+      data: response.data || response,
+      xToken: token,
     });
   } catch (error) {
     console.error('Error in verifyDlOtp controller:', error);
@@ -54,18 +60,22 @@ export const verifyDlOtp = async (req, res) => {
   }
 };
 
-
 export const createENumber = async (req, res) => {
   try {
     const { txnId,  DL_number, First_Name, Middle_Name, Last_Name, d_o_b, gender, base_front_photo, base_back_photo, Address, state, District, Pincode } = req.body;
     // 
-    const accessToken = req.headers['accesstoken'];
+    const accessToken = req.headers['accesstoken'] ??  (await abhaService.getAccessTokenInternal());
 
     const response = await DLenroll.createENumber({accessToken, txnId, DL_number, First_Name, Middle_Name, Last_Name, d_o_b, gender, base_front_photo, base_back_photo, Address, state, District, Pincode });
+    const token = extractToken(response);
+    if (token) {
+      setXTokenCookie(res, token);
+    }
     
     res.status(200).json({ 
       success: true, 
-      data: response 
+      data: response.data || response,
+      xToken: token,
     });
   } catch (error) {
     console.error('Error in verifyAadhaarOtp controller:', error);

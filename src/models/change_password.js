@@ -10,7 +10,7 @@ const requestLoginOtp = async (accessToken, X_token, password) => {
       throw new Error('Missing required parameters: accessToken, X_token and password');
     }
     const response = await axios.post(
-      `${config.abdm.abhaBaseUrl}/api/v3/profile/account/request/otp`,
+      `${config.abdm.abhaBaseUrl}/api/v3/profile/account/request/otp`, 
       {
         scope: [
             "abha-profile",

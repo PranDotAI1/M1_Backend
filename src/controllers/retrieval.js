@@ -1,63 +1,66 @@
 import retrieval from '../models/retrievale.js';
+import abhaService from '../services/abhaService.js';
+import { setXTokenCookie, extractToken } from '../utils/cookieHelper.js';
+
 export const requestLoginOtp = async (req, res) => {
   try {
     const { loginId } = req.body;
-    const access_token = req.headers['accesstoken'];
+    const access_token = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!loginId || !access_token) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Mobile number and accesstoken is required' 
+      return res.status(400).json({
+        success: false,
+        message: 'Mobile number and accesstoken is required',
       });
     }
 
-
-    
     const response = await retrieval.requestLoginOtp(access_token, loginId);
-    
-    res.status(200).json({ 
-      success: true, 
-      data: response 
+
+    res.status(200).json({
+      success: true,
+      data: response,
     });
   } catch (error) {
     console.error('Error in requestLoginOtp controller:', error);
-    
-    res.status(error.status || 500).json({ 
-      success: false, 
+
+    res.status(error.status || 500).json({
+      success: false,
       message: error.message || 'An error occurred while requesting login OTP',
-      error: error.response || null
+      error: error.response || null,
     });
   }
 };
-
 
 // Verify OTP for ABHA login
 
 export const verifyLoginOtp = async (req, res) => {
   try {
     const { txnId, otp } = req.body;
-    const accessToken = req.headers['accesstoken'];
+    const accessToken = req.headers['accesstoken'] ?? (await abhaService.getAccessTokenInternal());
     if (!accessToken || !txnId || !otp) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'accesstoken, txnId and otp are required' 
+      return res.status(400).json({
+        success: false,
+        message: 'accesstoken, txnId and otp are required',
       });
     }
-    
-    const response = await retrieval.verifyLoginOtp({accessToken, txnId, otp });
-    
-    // Return both the data and the X-token to the frontend
-    res.status(200).json({ 
-      success: true, 
-      data: response.data,
-      xToken: response.xToken // Frontend will store this
+
+    const response = await retrieval.verifyLoginOtp({ accessToken, txnId, otp });
+    const token = extractToken(response);
+    if (token) {
+      setXTokenCookie(res, token);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: response.data || response,
+      xToken: token,
     });
   } catch (error) {
     console.error('Error in verifyLoginOtp controller:', error);
-    
-    res.status(error.status || 500).json({ 
-      success: false, 
+
+    res.status(error.status || 500).json({
+      success: false,
       message: error.message || 'An error occurred while verifying login OTP',
-      error: error.response || null
+      error: error.response || null,
     });
   }
 };

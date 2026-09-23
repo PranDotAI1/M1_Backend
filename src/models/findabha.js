@@ -119,9 +119,11 @@ const verifyindexOtp = async ({ accessToken, txnId, otp }) => {
       );
     
     // Return the response data along with the X-token from headers
+    const xToken = response.data?.token || response.data?.tokens?.token;
+
     return {
       data: response.data,
-  
+      xToken,
     };
   } catch (error) {
     console.error('Error verifying login OTP:', error.response?.data || error.message);
