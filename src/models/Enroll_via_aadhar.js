@@ -63,7 +63,17 @@ const sendAadhaarOtp = async (accessToken, loginId) => {
     else if (error.response?.data === 'Please make a valid request.') {
       message = "Aadhar number is not valid"
     } else {
-      message = error.response?.data?.message || error.response?.data || error.message ||  "Failed to send OTP"
+      if (isObject(error.response?.data)) {
+        if (error.response?.data?.loginId) {
+          message = error.response?.data?.loginId;
+        } else if (error.response?.data?.message) {
+          message = error.response?.data?.message;
+        } else {
+          message = "Aadhar number is not valid";
+        }
+      } else {
+        message = "Please check Aadhar. Failed to send OTP."
+      }
     }
     throw new Error(message);
   }
