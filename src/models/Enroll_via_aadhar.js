@@ -6,6 +6,10 @@ import path from 'path';
 import fs from 'fs';
 import https from 'https';
 
+function isObject(value) {
+  return value !== null && typeof value === "object";
+}
+
 dotenv.config();
 
 // Function to clear folders
